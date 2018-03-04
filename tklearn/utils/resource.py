@@ -1,3 +1,4 @@
+import json
 from os import walk, environ
 from os.path import join
 
@@ -6,16 +7,24 @@ def download():
     raise NotImplementedError('Download function has not been implemented yet.')
 
 
-def resource_path():
+def resource_path(*args):
     """
     Gets resource folder name from environment path.
+    :param args: resource path if exists
     :return: Returns path to the resource folder at the root
     """
     try:
-        return environ['TKLEARN_RESOURCES']
+        return join(environ['TKLEARN_RESOURCES'], *args)
     except KeyError:
         msg = 'The environment variable \'TKLEARN_RESOURCES\' is not set.'
         raise LookupError(msg)
+
+
+def get_lexicon(name):
+    resources = json.load(open(resource_path('resources.json')))
+    lexicons = resources['lexicons']
+    path = resource_path(*lexicons[name]['path'])
+    return path
 
 
 def list_files(base_path, predicate):
