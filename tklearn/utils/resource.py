@@ -21,6 +21,12 @@ def resource_path(*args):
 
 
 def get_lexicon(name):
+    """
+    Gets resources from resource path.
+     Resource path should contain json file indicating the resources and how to access them.
+    :param name: name of the lexicon resource
+    :return: path to lexicon
+    """
     resources = json.load(open(resource_path('resources.json')))
     lexicons = resources['lexicons']
     path = resource_path(*lexicons[name]['path'])
