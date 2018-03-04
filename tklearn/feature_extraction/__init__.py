@@ -1,1 +1,1 @@
-from .TokenFeaturizer import TokenFeaturizer
+from .LexiconFeaturizer import LexiconFeaturizer
