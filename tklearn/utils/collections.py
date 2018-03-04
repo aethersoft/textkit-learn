@@ -1,6 +1,3 @@
-import os
-from os.path import join, dirname
-
 import numpy as np
 import scipy.sparse as sp
 
@@ -53,38 +50,6 @@ def apply(func, arr, *args, **kwargs):
     :return:
     """
     return [func(item, *args, **kwargs) for item in arr]
-
-
-def resource_path():
-    """
-    Gets resource folder.
-    :return: Returns path to the resource folder at the root
-    """
-    return join(dirname(__file__), '..', '..', 'resources')
-
-
-def list_files(base_path, predicate):
-    """
-    Generator for walking through the folder structure
-
-    :param base_path:
-    :param predicate:
-    :return:
-    """
-    for folder, subs, files in os.walk(base_path):
-        for filename in files:
-            if predicate(os.path.join(folder, filename)):
-                yield (os.path.join(folder, filename))
-
-
-def get_bigrams(tokens):
-    """
-    Given a iterable of tokens generated bigrams
-
-    :param tokens: iterable of tokens
-    :return: bigrams
-    """
-    return [a + " " + b for a, b in zip(tokens, tokens[1:])]
 
 
 def merge_dicts(*dicts):

@@ -13,7 +13,8 @@ __all__ = [
     'shape_char',
     'shape_mask',
     'word_shape',
-    'char_count'
+    'char_count',
+    'bigrams'
 ]
 
 
@@ -73,3 +74,13 @@ def char_count(s):
         else:
             o += 1
     return (u, l, d, e, o)
+
+
+def bigrams(tokens):
+    """
+    Given a iterable of tokens generated bigrams
+
+    :param tokens: iterable of tokens
+    :return: bigrams
+    """
+    return [a + " " + b for a, b in zip(tokens, tokens[1:])]
