@@ -3,7 +3,7 @@ import gzip
 import os
 from collections import defaultdict
 
-from tklearn.utils import get_bigrams, merge_dicts
+from tklearn.utils import bigrams, merge_dicts
 
 
 class SentiWordnetScorer:
@@ -107,7 +107,7 @@ class PolarityScorer:
     def __call__(self, tokens, bigram=True):
         unigrams = tokens
         if bigram:
-            bigrams = get_bigrams(tokens)
+            bigrams = bigrams(tokens)
             scores = [x + y for x, y in zip(self.extract_scores(unigrams), self.extract_scores(bigrams))]
         else:
             scores = self.extract_scores(unigrams)
