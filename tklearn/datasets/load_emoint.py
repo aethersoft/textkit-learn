@@ -29,7 +29,7 @@ def load_emoint(input_path=''):
             lines = f.readlines()
             for line in lines:
                 id, text, emotion, rating = line.decode().strip().split('\t')
-                data[dataset_type][id] = {'text': text, 'emotion': emotion, 'rating': rating}
+                data[dataset_type][id] = {'text': text, 'emotion': emotion, 'rating': float(rating)}
                 if id in ids:
                     msg = 'Records with duplicated ID {0} found. Use records with unique ID.'.format(id)
                     raise ValueError(msg)
