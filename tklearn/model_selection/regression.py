@@ -34,7 +34,7 @@ def _multitask_indexable(X, y, groups=None):
 
 def multitask_cross_val_predict(estimator, X, y, groups=None, cv=2):
     """
-    Divides a list of inputs (Xs) and related labels (ys) to folds as provided by cv parameter and predicts output
+    Divides a list of inputs (Xs) and parallel labels (ys) to folds as provided by cv parameter and predicts output
      for each task. The associated pipeline/ estimator/ transformer should be able to handle input with multiple tasks.
 
     :param estimator: an estimator/ pipeline with a last stage implementing predict function
