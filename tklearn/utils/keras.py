@@ -1,5 +1,9 @@
 from keras.layers import GlobalAveragePooling1D, GlobalMaxPooling1D
 
+__all__ = [
+    'global_pooling_1d'
+]
+
 
 def global_pooling_1d(t):
     """
