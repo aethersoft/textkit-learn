@@ -108,7 +108,6 @@ def build_vocabulary(*x, tokenizer=None):
         def tokenize(s):
             return s.split(' ')
     vocab = set()
-    for s in list(*x):
-        print(s)
+    for s in x:
         vocab = collect(tokenize, s, vocab)
     return vocab
