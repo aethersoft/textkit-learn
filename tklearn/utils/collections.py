@@ -52,6 +52,26 @@ def apply(func, arr, *args, **kwargs):
     return [func(item, *args, **kwargs) for item in arr]
 
 
+def collect(func, ipt, out, *args, **kwargs):
+    """
+    Collects output for each input item and add them to provided list/set as set in output parameter.
+
+    :param func: a function to apply
+    :param ipt: input to function
+    :param out: collect outputs here should support += operator or should be a set
+    :param args: args to func call
+    :param kwargs: args to func call
+    :return:
+    """
+    for s in ipt:
+        p = func(s, *args, **kwargs)
+        if isinstance(out, set):
+            out.update(p)
+        else:
+            out += list(p)
+    return out
+
+
 def merge_dicts(*dicts):
     """
     Given number of dicts, merge them into a new dict as a shallow copy.

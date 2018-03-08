@@ -1,3 +1,7 @@
+import nltk
+
+from tklearn.utils import collect
+
 cap_tr = {'start:a': 'lower', 'start:A': 'upper', 'lower:a': 'lower', 'lower:A': 'mixed', 'upper:a': 'cap',
           'upper:A': 'upper', 'mixed:a': 'mixed', 'cap:a': 'cap', 'cap:A': 'mixed'}
 
@@ -84,3 +88,27 @@ def bigrams(tokens):
     :return: bigrams
     """
     return [a + " " + b for a, b in zip(tokens, tokens[1:])]
+
+
+def build_vocabulary(*x, tokenizer=None):
+    """
+    Builds and returns the vocabulary
+    :param x: arg list of sentence lists
+    :param tokenizer: tokenizer to use: can be string representation of separator or a function with attribute tokenize
+    :return: Vocabulary
+    """
+    if tokenizer is None:
+        tokenize = nltk.TweetTokenizer().tokenize
+    elif isinstance(tokenizer, str):
+        def tokenize(s):
+            return s.split(tokenizer)
+    elif hasattr(tokenizer, 'tokenize'):
+        tokenize = tokenizer.tokenize
+    else:
+        def tokenize(s):
+            return s.split(' ')
+    vocab = set()
+    for s in list(*x):
+        print(s)
+        vocab = collect(tokenize, s, vocab)
+    return vocab
