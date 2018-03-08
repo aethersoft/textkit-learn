@@ -1,1 +1,1 @@
-from .regression import multitask_cross_val_predict
+from ._validation import multitask_cross_val_predict

@@ -1,4 +1,5 @@
-from sklearn.model_selection import KFold
+from sklearn.base import is_classifier
+from sklearn.model_selection import check_cv
 from sklearn.utils import indexable
 
 from tklearn.utils import concatenate_array, invert_array, apply
@@ -39,7 +40,7 @@ def multitask_cross_val_predict(estimator, X, y, groups=None, cv=2):
 
     :param estimator: an estimator/ pipeline with a last stage implementing predict function
     :param X: input data for each task
-    :param y: labels for each task in the same order as the input tasks
+    :param y: parallel label sequence matching tasks in input
     :param groups: [ignored]
     :param cv: an integer indicating the number of folds or the cross validation iterators as provided in scikit-lean library
     :return: predictions for each task as a list
@@ -47,14 +48,13 @@ def multitask_cross_val_predict(estimator, X, y, groups=None, cv=2):
     assert len(X) == len(y), 'Cross validation requires a parallel data and label dataset. ' \
                              'Please fill \'None\' data-points explicitly.'
     X, y, groups = _multitask_indexable(X, y, groups)
-    if isinstance(cv, int):
-        k_fold = KFold(cv, shuffle=True)
-    else:
-        k_fold = cv
-    cv_splits = [([], []) for _ in range(cv)]
+
+    cv = check_cv(cv, y, classifier=is_classifier(estimator))
+
+    cv_splits = [([], []) for _ in range(cv.n_splits)]
     for _X, _y in zip(X, y):
         _idx = 0
-        for train, test in k_fold.split(_X, _y):
+        for train, test in cv.split(_X, _y):
             cv_splits[_idx][0].append(train)
             cv_splits[_idx][1].append(test)
             _idx += 1
