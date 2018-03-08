@@ -1,5 +1,6 @@
-from tklearn.model_selection import multitask_cross_val_predict
 import numpy as np
+
+from tklearn.model_selection import multitask_cross_val_predict
 
 
 class SampleFitter:
@@ -17,7 +18,8 @@ def multi_task_cv_test():
     pred = multitask_cross_val_predict(SampleFitter(),
                                        [np.array([[1, 5], [2, 8], [5, 8], [8, 1]]), np.array([[1], [5], [8]])],
                                        [np.array([1, 5, 8, 9]), np.array([5, 8, 3])])
-    assert (pred == [np.array([1, 2, 5, 8]), np.array([1, 5, 8])]).all()
+    assert (pred[0] == np.array([1, 2, 5, 8])).all() and (pred[1] == np.array([1, 5, 8])).all()
+    print('Assert Success [DONE]')
 
 
 multi_task_cv_test()

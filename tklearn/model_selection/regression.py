@@ -44,6 +44,8 @@ def multitask_cross_val_predict(estimator, X, y, groups=None, cv=2):
     :param cv: an integer indicating the number of folds or the cross validation iterators as provided in scikit-lean library
     :return: predictions for each task as a list
     """
+    assert len(X) == len(y), 'Cross validation requires a parallel data and label dataset. ' \
+                             'Please fill \'None\' data-points explicitly.'
     X, y, groups = _multitask_indexable(X, y, groups)
     if isinstance(cv, int):
         k_fold = KFold(cv, shuffle=True)
