@@ -18,7 +18,8 @@ __all__ = [
     'shape_mask',
     'word_shape',
     'char_count',
-    'bigrams'
+    'bigrams',
+    'build_vocabulary'
 ]
 
 
