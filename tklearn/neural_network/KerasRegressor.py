@@ -27,8 +27,8 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
         :param y: Target vector relative to X of shape shape = [n_samples]
         :return: self
         """
-        self.model_ = self.build_model(X, y)
         X, y = self.preprocess(X, y)
+        self.model_ = self.build_model(X, y)
         self.model_.fit(X, y, batch_size=self.batch_size, epochs=self.epochs)
         return self
 
