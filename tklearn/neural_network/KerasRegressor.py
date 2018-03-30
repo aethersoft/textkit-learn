@@ -77,6 +77,24 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
         pass
 
     @abstractmethod
+    def save(self, filepath):
+        """
+        Saves the model weights in a file provided by path
+        :type filepath: path to the file
+        :return: status
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def load(self, filepath):
+        """
+        Loads model from the filepath
+        :type filepath: path to the file
+        :return: Saved model
+        """
+        raise NotImplementedError
+
+    @abstractmethod
     def preprocess(self, X, y=None):
         """
         Preprocess the data and return the preprocessed input for the model
@@ -84,3 +102,9 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
         :return: model input
         """
         return X, y
+
+    def __getstate__(self):
+        return {}
+
+    def __setstate__(self, state):
+        pass
