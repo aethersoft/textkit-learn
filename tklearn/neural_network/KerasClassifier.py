@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from sklearn.base import BaseEstimator, ClassifierMixin
 
 
-class KerasRegressor(ABC, BaseEstimator, ClassifierMixin):
+class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
     """
     An more abstract version of KerasClassifier for scikit-learn with custom preprocess pipeline.
     """

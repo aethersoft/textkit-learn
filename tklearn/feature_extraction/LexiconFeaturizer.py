@@ -3,7 +3,7 @@ from collections import defaultdict
 import numpy as np
 from sklearn.preprocessing import FunctionTransformer
 
-from tklearn.utils import get_lexicon
+from tklearn.utils import get_featurizer
 
 
 class LexiconFeaturizer(FunctionTransformer):
@@ -40,7 +40,7 @@ class LexiconFeaturizer(FunctionTransformer):
 
     def _extract_features(self, seq, feature):
         outs = []
-        extract_features = get_lexicon(feature)
+        extract_features = get_featurizer(feature)
         for tokens in seq:
             text = ' '.join(tokens)
             if self.caching and text in LexiconFeaturizer.__mem_cache[feature]:

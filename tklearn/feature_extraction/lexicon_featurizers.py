@@ -107,8 +107,8 @@ class PolarityScorer:
     def __call__(self, tokens, bigram=True):
         unigrams = tokens
         if bigram:
-            bigrams = bigrams(tokens)
-            scores = [x + y for x, y in zip(self.extract_scores(unigrams), self.extract_scores(bigrams))]
+            bt = bigrams(tokens)
+            scores = [x + y for x, y in zip(self.extract_scores(unigrams), self.extract_scores(bt))]
         else:
             scores = self.extract_scores(unigrams)
         return scores
