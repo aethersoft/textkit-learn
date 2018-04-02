@@ -1,3 +1,4 @@
+import numpy as np
 from sklearn.base import is_classifier
 from sklearn.model_selection import check_cv
 from sklearn.utils import indexable
@@ -11,8 +12,15 @@ def _multitask_fit_predict(estimator, X, y, train, test):
     x_train, y_train, x_test, y_test_idx = [], [], [], []
     _idx = 0
     for _x, _y, _train, _test in zip(X, y, train, test):
+        #  convert to numpy arrays if instance is list
+        if isinstance(_y, list):
+            _y = np.array(_y)
+        if isinstance(_x, list):
+            _x = np.array(_x)
         x_train += [_x[_train]]
         x_test += [_x[_test]]
+        if isinstance(_y, list):
+            _y = np.array(_y)
         if _y is not None:
             y_train += [_y[_train]]
             y_test_idx += [_test]
