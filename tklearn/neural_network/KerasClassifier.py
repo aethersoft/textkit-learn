@@ -67,7 +67,7 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         :param sample_weight: Sample weights.
         :return:
         """
-        x_train = self.preprocess(x_train)
+        x_train, y = self.preprocess(x_train, y)
         return self.model_.evaluate(x_train, y, batch_size=self.batch_size)
 
     @abstractmethod
