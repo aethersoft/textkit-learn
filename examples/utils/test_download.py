@@ -1,5 +1,5 @@
-import tklearn
+from tklearn.utils import download
 
 
 def test_download():
-    tklearn.download()
+    download()
