@@ -1,5 +1,8 @@
+import json
+import os
 from abc import ABC, abstractmethod
 
+from keras.models import model_from_json
 from sklearn.base import BaseEstimator, RegressorMixin
 
 
@@ -76,23 +79,45 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
         """
         pass
 
-    @abstractmethod
     def save(self, filepath):
         """
         Saves the model weights in a file provided by path
         :type filepath: path to the file
         :return: status
         """
-        raise NotImplementedError
+        model_path = filepath + '_model.json'
+        weights_path = filepath + '_weights.h5'
+        args_path = filepath + '_args.json'
+        # Save the weights
+        self.model_.save_weights(weights_path)
+        # Save the model architecture
+        with open(model_path, 'w') as f:
+            f.write(self.model_.to_json())
+        with open(args_path, 'w') as f:
+            json.dump({'batch_size': self.batch_size, 'epochs': self.epochs}, f)
 
-    @abstractmethod
     def load(self, filepath):
         """
         Loads model from the filepath
         :type filepath: path to the file
         :return: Saved model
         """
-        raise NotImplementedError
+        model_path = filepath + '_model.json'
+        weights_path = filepath + '_weights.h5'
+        args_path = filepath + '_args.json'
+        if not os.path.isfile(model_path):
+            raise IOError('Ca\'t find models in \'{}\''.format(model_path))
+        if not os.path.isfile(weights_path):
+            raise IOError('Ca\'t find weights in \'{}\''.format(weights_path))
+        # Model reconstruction from JSON file
+        with open(model_path, 'r') as f:
+            self.model_ = model_from_json(f.read())
+        # Load weights into the new model
+        self.model_.load_weights(weights_path)
+        with open(args_path, 'r') as f:
+            kwargs = json.load(f)
+            self.batch_size = kwargs['batch_size']
+            self.epochs = kwargs['epochs']
 
     @abstractmethod
     def preprocess(self, X, y=None):

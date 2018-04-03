@@ -96,6 +96,7 @@ def build_vocabulary(*x, tokenizer=None):
     Builds and returns the vocabulary
     :param x: arg list of sentence lists
     :param tokenizer: tokenizer to use: can be string representation of separator or a function with attribute tokenize
+    (defaults to tweet tokenizer)
     :return: Vocabulary
     """
     if tokenizer is None:
