@@ -74,7 +74,7 @@ def multitask_cross_val_predict(estimator, X, y, groups=None, cv=2):
         for block_y, block_y_index in predictions_split:
             _expected_len = len(block_y_index)
             _output_len = len(block_y)
-            if _expected_len != len(block_y):
+            if _expected_len != _output_len:
                 raise ValueError(
                     'Output of the estimator is incompatible with size of the input: '
                     'expected len={}, found len={}'.format(_expected_len, _output_len))
