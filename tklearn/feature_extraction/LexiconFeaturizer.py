@@ -4,8 +4,9 @@ from collections import defaultdict
 import numpy as np
 from sklearn.preprocessing import FunctionTransformer
 
-from tklearn.feature_extraction import PolarityCounter, SentiWordnetScorer, PolarityScorer, SentimentRanking, \
-    LIWCExtractor, ExtractEmbedding, NegationCounter, EmotionLexiconScorer, SentiStrengthScorer
+from .embedding_featurizers import *
+from .lexicon_featurizers import *
+from .linguistic_featurizers import *
 from tklearn.utils import resource_path
 
 __all__ = ['LexiconFeaturizer']
