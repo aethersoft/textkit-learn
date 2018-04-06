@@ -9,10 +9,10 @@ import numpy as np
 
 from sklearn.base import TransformerMixin
 from sklearn.externals.joblib import Parallel, delayed
-from sklearn.pipeline import _fit_one_transformer, _fit_transform_one, _transform_one
+from sklearn.pipeline import _fit_one_transformer, _fit_transform_one, _transform_one, _name_estimators
 from sklearn.utils.metaestimators import _BaseComposition
 
-__all__ = ['FeatureList']
+__all__ = ['FeatureList', 'make_list']
 
 
 class FeatureList(_BaseComposition, TransformerMixin):
@@ -182,3 +182,27 @@ class FeatureList(_BaseComposition, TransformerMixin):
             (name, None if old is None else next(transformers))
             for name, old in self.transformer_list
         ]
+
+
+def make_list(*transformers, **kwargs):
+    """Construct a FeatureList from the given transformers.
+    This is a shorthand for the FeatureList constructor; it does not require,
+    and does not permit, naming the transformers. Instead, they will be given
+    names automatically based on their types. It also does not allow weighting.
+    Parameters
+    ----------
+    *transformers : list of estimators
+    n_jobs : int, optional
+        Number of jobs to run in parallel (default 1).
+    Returns
+    -------
+    f : FeatureList
+    --------
+    """
+    n_jobs = kwargs.pop('n_jobs', 1)
+    if kwargs:
+        # We do not currently support `transformer_weights` as we may want to
+        # change its type spec in make_union
+        raise TypeError('Unknown keyword arguments: "{}"'
+                        .format(list(kwargs.keys())[0]))
+    return FeatureList(_name_estimators(transformers), n_jobs=n_jobs)
