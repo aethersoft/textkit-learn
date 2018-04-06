@@ -12,10 +12,10 @@ from sklearn.externals.joblib import Parallel, delayed
 from sklearn.pipeline import _fit_one_transformer, _fit_transform_one, _transform_one
 from sklearn.utils.metaestimators import _BaseComposition
 
-__all__ = ['FeatureConcatenate']
+__all__ = ['FeatureList']
 
 
-class FeatureConcatenate(_BaseComposition, TransformerMixin):
+class FeatureList(_BaseComposition, TransformerMixin):
     """Collects results of multiple transformer objects.
     This estimator applies a list of transformer objects in parallel to the
     input data, then concatenates the results. This is useful to combine
