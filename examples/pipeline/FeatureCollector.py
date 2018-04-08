@@ -1,7 +1,7 @@
-from tklearn.pipeline import FeatureConcatenate
+from tklearn.pipeline import FeatureList
 from tklearn.preprocessing import TweetTokenizer
 
-fc = FeatureConcatenate([('a', TweetTokenizer()), ('b', TweetTokenizer(vocab=['1', '2']))])
+fc = FeatureList([('a', TweetTokenizer()), ('b', TweetTokenizer(vocab=['1', '2']))])
 
 X = ['test 1', 'test 2']
 
