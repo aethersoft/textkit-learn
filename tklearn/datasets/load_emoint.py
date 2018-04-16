@@ -18,7 +18,10 @@ def load_emoint(input_path=''):
             'sadness_dev': os.path.join(input_path, 'dev.gold\\sadness-ratings-0to1.dev.gold.txt'),
         },
         'test': {
-
+            'anger_test': os.path.join(input_path, 'test.gold\\anger-ratings-0to1.test.gold.txt'),
+            'fear_test': os.path.join(input_path, 'test.gold\\fear-ratings-0to1.test.gold.txt'),
+            'joy_test': os.path.join(input_path, 'test.gold\\joy-ratings-0to1.test.gold.txt'),
+            'sadness_test': os.path.join(input_path, 'test.gold\\sadness-ratings-0to1.test.gold.txt'),
         }
     }
     data = {'train': dict(), 'dev': dict(), 'test': dict()}
