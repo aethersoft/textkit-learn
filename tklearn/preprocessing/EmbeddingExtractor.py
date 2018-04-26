@@ -106,6 +106,9 @@ class EmbeddingExtractor(BaseEstimator, TransformerMixin):
                 try:
                     token_indexes += [self.word_index_[token]]
                 except KeyError:
+                    #  Removes word indexes not identified in fitting phrase
+                    #  "Ignoring the words not found"
+                    #  Use {{self.default}} to map words not in embeddings to word vector
                     pass
             sequences += [token_indexes]
         if self.pad_sequences:
@@ -137,17 +140,19 @@ class EmbeddingExtractor(BaseEstimator, TransformerMixin):
         :return: embedding matrix
         """
         self.embedding_matrix_ = None
+        _word_index = {}
         for word, idx in self.word_index_.items():
             embedding_vector = self._generate_word_vector(word)
             if embedding_vector is not None:
                 if self.embedding_matrix_ is None:
                     self.embedding_matrix_ = np.zeros((len(self.word_index_) + 1, len(embedding_vector)))
-                # words not found in embedding index will be all-zeros.
+                #  words not found in embedding index will be all-zeros.
                 self.embedding_matrix_[idx] = embedding_vector
+                _word_index[word] = idx
             else:
-                embedding_vector = self.default(word)
-                if embedding_vector is not None:
-                    self.embedding_matrix_[idx] = embedding_vector
+                #  ignore words not in embeddings
+                pass
+        self.word_index_ = _word_index
 
     def _generate_word_vector(self, word):
         """
@@ -159,10 +164,14 @@ class EmbeddingExtractor(BaseEstimator, TransformerMixin):
             out = self.word_vectors[word]
         except KeyError:
             if self.default is None:
+                return None
+            elif self.default == 'random':
                 self.default = RandomWord2Vec(self.word_vectors.vector_size)
+            else:
+                pass
             out = self.default[word]
         if self.feature_generator is not None:
-            extra_features = self.feature_generator()
+            extra_features = self.feature_generator(word)
             extra = np.array(extra_features).astype(float)
             out = np.append(out, extra)
         return out
