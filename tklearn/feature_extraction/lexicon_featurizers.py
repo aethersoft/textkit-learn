@@ -3,7 +3,7 @@ import gzip
 import os
 from collections import defaultdict
 
-from tklearn.utils import bigrams, merge_dicts
+from tklearn.utils import merge_dicts, bigrams
 
 
 class SentiWordnetScorer:
