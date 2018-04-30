@@ -10,7 +10,7 @@ class TweetNLP:
     def __init__(self, tweet_nlp_path):
         self.tagger_cmd = TweetNLP.TAGGER_CMD + tweet_nlp_path.replace('\\', '\\\\')
 
-    def parse(self, tweets):
+    def tag(self, tweets):
         """
         Parse a list of tweets
 
@@ -32,21 +32,19 @@ class TweetNLP:
         :param tweets: input tweets
         :return: tagger results
         """
-
         # remove carriage returns as they are tweet separators for the stdin interface
         tweets_cleaned = [tw.replace('\n', ' ') for tw in tweets]
         message = "\n".join(tweets_cleaned)
+        message = message.encode('utf-8').decode('utf-8')
 
         fd, tmp_path = mkstemp()
         try:
-            with os.fdopen(fd, 'w') as tmp:
+            with open(fd, 'w', encoding='utf-8') as tmp:
                 tmp.write(message)
-            # cmd = self.tagger_cmd + ' ' + tmp_path
             args = shlex.split(self.tagger_cmd)
             args.append('--output-format')
             args.append('conll')
             args.append(tmp_path)
-            print(args)
             p = run(args, stdout=PIPE, stderr=PIPE)
             error = p.stderr
             output = p.stdout
