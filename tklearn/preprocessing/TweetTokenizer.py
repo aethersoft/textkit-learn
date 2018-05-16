@@ -1,8 +1,7 @@
 import nltk
 import numpy as np
+from gensim.utils import simple_preprocess
 from sklearn.preprocessing import FunctionTransformer
-
-from tklearn.utils.word2vec_reader_utils import simple_preprocess
 
 
 class TweetTokenizer(FunctionTransformer):
