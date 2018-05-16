@@ -2,21 +2,22 @@ import nltk
 import numpy as np
 from sklearn.preprocessing import FunctionTransformer
 
-from tklearn.text.twitter.TwitterNLP import TweetNLP
+from tklearn.utils.word2vec_reader_utils import simple_preprocess
 
 
 class TweetTokenizer(FunctionTransformer):
     _tokenizer = nltk.TweetTokenizer()
 
-    def __init__(self, tweet_nlp_path=None):
-        self.tweet_nlp_path = tweet_nlp_path
+    def __init__(self, tweet_nlp=None):
+        self.tweet_nlp = tweet_nlp
         super(TweetTokenizer, self).__init__(self._tokenize, ' '.join, validate=False)
 
     def _tokenize(self, seq):
-        if self.tweet_nlp_path is None:
+        if self.tweet_nlp is None:
             return np.array([TweetTokenizer._tokenizer.tokenize(text) for text in seq])
+        elif self.tweet_nlp == 'simple_preprocess':
+            return np.array([simple_preprocess(text) for text in seq])
         else:
-            _tweet_nlp = TweetNLP(self.tweet_nlp_path)
-            tag_set = _tweet_nlp.tag(seq)
+            tag_set = self.tweet_nlp.tag(seq)
             tokens = [list(list(zip(*tags))[0]) for tags in tag_set]
             return tokens
