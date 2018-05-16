@@ -5,7 +5,7 @@ from keras.preprocessing import sequence
 from sklearn.base import BaseEstimator, TransformerMixin
 
 
-class RandomWord2Vec:
+class RandomWordVec:
     """
     Generates random vectors for requested words and save them for future use. It is assumed that generated random
     vectors are random enough to get different vectors for each different input.
@@ -40,8 +40,29 @@ class RandomWord2Vec:
         return np.random.rand(self.dim)
 
 
+class ZeroWordVec:
+    """
+    Return Zero vectors of size dim as provided in const. Implemented for consistency reasons.
+    """
+
+    def __init__(self, dim=300):
+        """
+        Initializes the Random vector generator
+        :param dim: dimension of generating vector
+        """
+        self.dim = dim
+
+    def __getitem__(self, item):
+        """
+        Gets item from stored dictionary if exist else generate random vector
+        :param item: word/text
+        :return: generated word vector
+        """
+        return [0 for _ in range(self.dim)]
+
+
 class EmbeddingExtractor(BaseEstimator, TransformerMixin):
-    def __init__(self, word_vectors, vocab=None, feature_generator=None, vocab_size=None, pad_sequences=False,
+    def __init__(self, word_vectors, vocab=None, word_features=None, vocab_size=None, pad_sequences=False,
                  default=None):
         """
         Scikit-learn transformer like interface for tweet tokenizing
@@ -49,7 +70,7 @@ class EmbeddingExtractor(BaseEstimator, TransformerMixin):
         :param word_vectors: a word to embedding mapper
         :param vocab: a list of sentences to extract the vocabulary (by tokenizing).
                       If this is None, defaults to extracting vocabulary using dataset provided when fitting.
-        :param feature_generator: a callable with one string parameter to generate features based on input
+        :param word_features: a callable with one string parameter to generate features based on input
         :param vocab_size: maximum number of words in vocabulary
         :param pad_sequences: integer indicating the size of the sequence vector
         :param default: default word_vector / generator for missing word values
@@ -59,7 +80,7 @@ class EmbeddingExtractor(BaseEstimator, TransformerMixin):
         self.pad_sequences = pad_sequences
         self.word_vectors = word_vectors
         self.default = default
-        self.feature_generator = feature_generator
+        self.word_features = word_features
 
     def fit(self, X, *_):
         """
@@ -146,8 +167,12 @@ class EmbeddingExtractor(BaseEstimator, TransformerMixin):
             if embedding_vector is not None:
                 if self.embedding_matrix_ is None:
                     self.embedding_matrix_ = np.zeros((len(self.word_index_) + 1, len(embedding_vector)))
-                #  words not found in embedding index will be all-zeros.
-                self.embedding_matrix_[idx] = embedding_vector
+                try:
+                    self.embedding_matrix_[idx] = embedding_vector
+                except ValueError:
+                    raise ValueError(
+                        'Error setting embedding for word \'{}\'. The expected size is {} and output size is {}'
+                            .format(word, len(self.embedding_matrix_[idx]), len(embedding_vector)))
                 _word_index[word] = idx
             else:
                 #  ignore words not in embeddings
@@ -160,18 +185,22 @@ class EmbeddingExtractor(BaseEstimator, TransformerMixin):
         :param word: a word to generate features for
         :return: word vector including extra features
         """
-        try:
-            out = self.word_vectors[word]
-        except KeyError:
-            if self.default is None:
-                return None
-            elif self.default == 'random':
-                self.default = RandomWord2Vec(self.word_vectors.vector_size)
-            else:
-                pass
-            out = self.default[word]
-        if self.feature_generator is not None:
-            extra_features = self.feature_generator(word)
+        out = []
+        if self.default != 'skip':
+            try:
+                out = self.word_vectors[word]
+            except KeyError:
+                out = None
+            if out is None:
+                if self.default == 'random':
+                    self.default = RandomWordVec(self.word_vectors.vector_size)
+                elif self.default == 'zero':
+                    self.default = ZeroWordVec(self.word_vectors.vector_size)
+                elif self.default == 'ignore' or self.default is None:
+                    return None
+                out = self.default[word]
+        if self.word_features is not None:
+            extra_features = self.word_features(word)
             extra = np.array(extra_features).astype(float)
             out = np.append(out, extra)
         return out
