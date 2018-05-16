@@ -1,21 +1,20 @@
 import os
 from os import walk, environ, remove
-from os.path import join, exists, realpath, dirname
+from os.path import join
 from urllib.request import urlretrieve
 from zipfile import ZipFile
 
 RESOURCE_URL = 'https://github.com/aethersoft/textkit-learn/releases/download/v0.1/textkit-resources.zip'
-RESOURCE_PATH = dirname(realpath(__file__)) + '\\..\\..\\resources\\'
 
 
-def download(path=RESOURCE_PATH):
+def download(download_dir):
     """
     Downloads resources and saves in the default path.
-    :param path: path to custom resource folder location.
+    :param download_dir: path to custom resource folder location.
                  If custom location is use environment variable 'TKLEARN_RESOURCES' to point to that location.
     :return: Nothing
     """
-    extract_path = join(path, '..')
+    extract_path = join(download_dir, '..')
     download_path = join(extract_path, 'temp.zip')
     print('Downloading files...', end='')
     urlretrieve(RESOURCE_URL, download_path)
@@ -24,7 +23,7 @@ def download(path=RESOURCE_PATH):
     with ZipFile(download_path) as zip:
         zip.extractall(extract_path)
     try:
-        os.rename(join(extract_path, zip.namelist()[0]), path)
+        os.rename(join(extract_path, zip.namelist()[0]), download_dir)
         print('Done')
     except OSError:
         print('Failed')
@@ -42,11 +41,8 @@ def resource_path(*args):
     try:
         path = environ['TKLEARN_RESOURCES']
     except KeyError:
-        if exists(RESOURCE_PATH):
-            path = RESOURCE_PATH
-        else:
-            msg = 'The environment variable \'TKLEARN_RESOURCES\' is not set.'
-            raise LookupError(msg)
+        msg = 'The environment variable \'TKLEARN_RESOURCES\' is not set.'
+        raise LookupError(msg)
     return join(path, *args)
 
 
