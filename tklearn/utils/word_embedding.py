@@ -1,8 +1,14 @@
 import csv
 
+import gensim
 import numpy as np
 import pandas as pd
-from gensim.models import KeyedVectors
+
+"""
+This file is duplicated use the same functional units in text.embedding package.
+
+Will be replaced with the said package win the future developments.
+"""
 
 __all__ = [
     'load_word2vec',
@@ -46,7 +52,11 @@ def load_word2vec(data_file, binary=True, unicode_errors='ignore', verbose=False
     :param data_file: path to word2vec file
     :return: Binary Word2Vec
     """
-    w2v = KeyedVectors.load_word2vec_format(data_file, binary=binary, unicode_errors=unicode_errors)
+    if not binary:
+        model = gensim.models.Word2Vec.load(data_file)
+        w2v = model.wv
+    else:
+        w2v = gensim.models.KeyedVectors.load_word2vec_format(data_file, binary=binary, unicode_errors=unicode_errors)
     return WordEmbedding(w2v, w2v.vector_size)
 
 
