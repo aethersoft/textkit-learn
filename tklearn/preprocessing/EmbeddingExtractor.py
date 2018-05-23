@@ -68,7 +68,7 @@ class EmbeddingExtractor(BaseEstimator, TransformerMixin):
         Scikit-learn transformer like interface for tweet tokenizing
 
         :param word_vectors: a word to embedding mapper
-        :param vocab: a list of sentences to extract the vocabulary (by tokenizing).
+        :param vocab: a list of sentences to extract the vocabulary (by tokenizing) or list of words.
                       If this is None, defaults to extracting vocabulary using dataset provided when fitting.
         :param word_features: a callable with one string parameter to generate features based on input
         :param vocab_size: maximum number of words in vocabulary
@@ -97,8 +97,11 @@ class EmbeddingExtractor(BaseEstimator, TransformerMixin):
                     self.word_freq_[token] += 1
         else:
             for tokens in self.vocab:
-                for token in tokens:
-                    self.word_freq_[token] += 1
+                if isinstance(tokens, list):
+                    for token in tokens:
+                        self.word_freq_[token] += 1
+                else:
+                    self.word_freq_[tokens] += 1
         # Build word index
         self.word_index_ = dict()
         if self.vocab_size is None:
