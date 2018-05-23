@@ -1,22 +1,32 @@
 import nltk
 import numpy as np
-from gensim.utils import simple_preprocess
 from sklearn.preprocessing import FunctionTransformer
+
+from tklearn.text.twitter import TweetNLP
 
 
 class TweetTokenizer(FunctionTransformer):
     _tokenizer = nltk.TweetTokenizer()
 
-    def __init__(self, tweet_nlp=None):
-        self.tweet_nlp = tweet_nlp
+    def __init__(self, preprocessor=None, tokenizer=None, stopwords=None, vocabulary=None):
+        self.tokenizer = tokenizer
+        self.stopwords = stopwords
+        self.vocabulary = vocabulary
+        self.preprocessor = preprocessor
         super(TweetTokenizer, self).__init__(self._tokenize, ' '.join, validate=False)
 
     def _tokenize(self, seq):
-        if self.tweet_nlp is None:
-            return np.array([TweetTokenizer._tokenizer.tokenize(text) for text in seq])
-        elif self.tweet_nlp == 'simple_preprocess':
-            return np.array([simple_preprocess(text) for text in seq])
+        if self.preprocessor is not None:
+            seq = [self.preprocessor(s) for s in seq]
+        if self.tokenizer is None:
+            output = [TweetTokenizer._tokenizer.tokenize(text) for text in seq]
+        elif isinstance(self.tokenizer, TweetNLP):
+            tag_set = self.tokenizer.tag(seq)
+            output = [list(list(zip(*tags))[0]) for tags in tag_set]
         else:
-            tag_set = self.tweet_nlp.tag(seq)
-            tokens = [list(list(zip(*tags))[0]) for tags in tag_set]
-            return tokens
+            output = [self.tokenizer.tokenize(text) for text in seq]
+        if self.stopwords is not None:
+            output = [[token for token in tweet if token not in self.stopwords] for tweet in output]
+        if self.vocabulary is not None:
+            output = [[token for token in tweet if token in self.vocabulary] for tweet in output]
+        return np.array(output)
