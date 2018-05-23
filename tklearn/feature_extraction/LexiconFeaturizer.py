@@ -19,7 +19,7 @@ class LexiconFeaturizer(FunctionTransformer):
 
     __mem_cache = defaultdict(dict)
 
-    def __init__(self, features=None, caching=None):
+    def __init__(self, lexicons=None, caching=None):
         """
         Creates a LexiconFeaturizer
 
@@ -27,7 +27,7 @@ class LexiconFeaturizer(FunctionTransformer):
         """
         super(LexiconFeaturizer, self).__init__(self._get_lexicon_features, validate=False, )
         self.caching = caching
-        self.features = features
+        self.lexicons = lexicons
 
     def _get_lexicon_features(self, seq):
         """
@@ -36,10 +36,10 @@ class LexiconFeaturizer(FunctionTransformer):
         :param seq: Sequence of token inputs
         :return: a list of feature vectors extracted from the sequence of texts in the same order
         """
-        if isinstance(self.features, str):
-            return self._extract_features(seq, self.features)
+        if isinstance(self.lexicons, str):
+            return self._extract_features(seq, self.lexicons)
         else:
-            outs = [self._extract_features(seq, f) for f in self.features]
+            outs = [self._extract_features(seq, f) for f in self.lexicons]
             return np.concatenate(outs, axis=1)
 
     def _extract_features(self, seq, feature):
