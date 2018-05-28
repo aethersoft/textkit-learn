@@ -27,9 +27,11 @@ class EmbeddingAverager(BaseEstimator, TransformerMixin):
         """
         embedding_matrix = X['embedding_matrix']
         X = X['tokens']
+        dim = embedding_matrix.shape[1]
         result = []
         for x in X:
-            result += [np.average([embedding_matrix[e] for e in x], axis=0)]
+            avg = np.average([embedding_matrix[e] for e in x], axis=0) if len(x) > 0 else np.zeros(dim)
+            result.append(avg)
         return np.array(result)
 
     def fit_transform(self, X, y=None, **fit_params):
