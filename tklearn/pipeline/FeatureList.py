@@ -203,6 +203,5 @@ def make_list(*transformers, **kwargs):
     if kwargs:
         # We do not currently support `transformer_weights` as we may want to
         # change its type spec in make_union
-        raise TypeError('Unknown keyword arguments: "{}"'
-                        .format(list(kwargs.keys())[0]))
+        raise TypeError('Unknown keyword arguments: "{}"'.format(list(kwargs.keys())[0]))
     return FeatureList(_name_estimators(transformers), n_jobs=n_jobs)
