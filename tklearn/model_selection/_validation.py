@@ -3,7 +3,7 @@ from sklearn.base import is_classifier
 from sklearn.model_selection import check_cv
 from sklearn.utils import indexable
 
-from tklearn.utils import concatenate_array, invert_array, apply
+from tklearn.utils.collections import invert_array, apply, concatenate_array
 
 __all__ = ['multitask_cross_val_predict']
 

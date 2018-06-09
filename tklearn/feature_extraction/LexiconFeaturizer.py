@@ -1,11 +1,12 @@
 import json
+from collections import defaultdict
 
+import numpy as np
 from sklearn.preprocessing import FunctionTransformer
 
-from tklearn.utils import resource_path
-from .embedding_featurizers import *
-from .lexicon_featurizers import *
-from .linguistic_featurizers import *
+from tklearn.feature_extraction.featurizers import PolarityCounter, SentiWordnetScorer, PolarityScorer, \
+    SentimentRanking, LIWCExtractor, ExtractEmbedding, NegationCounter, EmotionLexiconScorer, SentiStrengthScorer
+from tklearn.utils.resource import resource_path
 
 __all__ = ['LexiconFeaturizer']
 
@@ -86,7 +87,7 @@ def _get_featurizer(name):
         return PolarityScorer(*lexicons)
     elif featurizer == 'SentimentRanking':
         fid = resources['featurizers'][name]['id']
-        return SentimentRanking(*lexicons, fid)
+        return SentimentRanking(fid, *lexicons)
     elif featurizer == 'LIWCExtractor':
         return LIWCExtractor(*lexicons)
     elif featurizer == 'ExtractEmbedding':
