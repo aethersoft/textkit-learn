@@ -9,4 +9,4 @@ setup(name='tklearn',
       license='MIT',
       packages=find_packages(),
       package_dir={'tklearn': 'tklearn'},
-      zip_safe=False)
+      zip_safe=False, install_requires=['pandas', 'numpy', 'scipy', 'scikit-learn', 'nltk'])
