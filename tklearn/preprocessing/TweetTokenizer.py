@@ -13,7 +13,7 @@ class TweetTokenizer(FunctionTransformer):
         self.stopwords = stopwords
         self.vocabulary = vocabulary
         self.preprocessor = preprocessor
-        super(TweetTokenizer, self).__init__(self._tokenize, ' '.join, validate=False)
+        super(TweetTokenizer, self).__init__(self.tokenize, ' '.join, validate=False)
 
     def tokenize(self, seq):
         if self.preprocessor is not None:
