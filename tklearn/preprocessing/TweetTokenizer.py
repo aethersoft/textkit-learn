@@ -15,7 +15,7 @@ class TweetTokenizer(FunctionTransformer):
         self.preprocessor = preprocessor
         super(TweetTokenizer, self).__init__(self._tokenize, ' '.join, validate=False)
 
-    def _tokenize(self, seq):
+    def tokenize(self, seq):
         if self.preprocessor is not None:
             seq = [self.preprocessor(s) for s in seq]
         if self.tokenizer is None:
