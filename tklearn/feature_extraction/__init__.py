@@ -1,1 +1,3 @@
+from .EmbeddingAverager import EmbeddingAverager
+from .EmbeddingExtractor import EmbeddingExtractor
 from .LexiconFeaturizer import LexiconFeaturizer
