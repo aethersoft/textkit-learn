@@ -101,7 +101,7 @@ def trigrams(tokens):
         return [a for a in tokens]
 
 
-def make_vocabulary(*args, **kwargs):
+def build_vocabulary(*args, **kwargs):
     """
     Builds and returns the vocabulary
 
