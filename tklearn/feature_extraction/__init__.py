@@ -1,3 +1,9 @@
-from .EmbeddingAverager import EmbeddingAverager
-from .EmbeddingExtractor import EmbeddingExtractor
-from .LexiconFeaturizer import LexiconFeaturizer
+from .embedding_averager import EmbeddingAverager
+from .embedding_extractor import EmbeddingExtractor
+from .lexicon_featurizer import LexiconFeaturizer
+
+__all__ = [
+    'EmbeddingAverager',
+    'EmbeddingExtractor',
+    'LexiconFeaturizer',
+]

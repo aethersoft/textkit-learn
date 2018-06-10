@@ -1,7 +1,9 @@
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 
-from tklearn.feature_extraction import EmbeddingExtractor
+from .embedding_extractor import EmbeddingExtractor
+
+__all__ = ['EmbeddingAverager']
 
 
 class EmbeddingAverager(BaseEstimator, TransformerMixin):

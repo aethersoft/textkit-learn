@@ -1,5 +1,10 @@
 from sklearn.preprocessing import FunctionTransformer
 
+__all__ = [
+    'SelectByIndex',
+    'SelectByKey',
+]
+
 
 class SelectByIndex(FunctionTransformer):
     def __init__(self, index, axis=1):

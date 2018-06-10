@@ -4,6 +4,8 @@ import numpy as np
 from keras.preprocessing import sequence
 from sklearn.base import BaseEstimator, TransformerMixin
 
+__all__ = ['EmbeddingExtractor']
+
 
 class RandomWordVec:
     """

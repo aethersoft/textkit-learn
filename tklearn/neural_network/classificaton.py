@@ -7,7 +7,7 @@ from keras.layers import Embedding, Conv1D, GlobalMaxPooling1D, GlobalAveragePoo
 from keras.utils import to_categorical
 from scipy.sparse import isspmatrix
 
-from tklearn.neural_network import KerasClassifier
+from .base import KerasClassifier
 
 
 class FNNClassifier(KerasClassifier):
@@ -211,7 +211,7 @@ class LSTMClassifier(KerasClassifier):
 
 
 class CNNLSTMClassifier(KerasClassifier):
-    def __init__(self,filters=250, kernel_size=3, pooling=None, dropout=None, lstm_units=300,
+    def __init__(self, filters=250, kernel_size=3, pooling=None, dropout=None, lstm_units=300,
                  pool_size=1, hidden_dims=None, trainable=False, batch_size=32, epochs=15):
         """
         Initializes the classifier

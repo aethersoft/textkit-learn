@@ -7,7 +7,7 @@ from keras.layers import Embedding, Conv1D, GlobalMaxPooling1D, GlobalAveragePoo
 from keras.utils import to_categorical
 from scipy.sparse import isspmatrix
 
-from tklearn.neural_network import KerasRegressor
+from .base import KerasRegressor
 
 
 class FNNRegressor(KerasRegressor):

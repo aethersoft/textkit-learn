@@ -1,5 +1,5 @@
-from .KerasClassifier import KerasClassifier
-from .KerasRegressor import KerasRegressor
+from .base import KerasClassifier
+from .base import KerasRegressor
 from .classificaton import CNNClassifier
 from .classificaton import CNNLSTMClassifier
 from .classificaton import FNNClassifier
@@ -10,3 +10,18 @@ from .regression import CNNRegressor
 from .regression import FNNRegressor
 from .regression import LSTMCNNRegressor
 from .regression import LSTMRegressor
+
+__all__ = [
+    'KerasClassifier',
+    'KerasRegressor',
+    'CNNClassifier',
+    'CNNLSTMClassifier',
+    'FNNClassifier',
+    'LSTMCNNClassifier',
+    'LSTMClassifier',
+    'CNNLSTMRegressor',
+    'CNNRegressor',
+    'FNNRegressor',
+    'LSTMCNNRegressor',
+    'LSTMRegressor',
+]
