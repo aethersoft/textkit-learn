@@ -79,7 +79,11 @@ class DictionaryTokenizer(Tokenizer):
         for w in self.vocabulary:
             temp = [k for k in re.split('(\W)', re.sub(r'_', ' ', w)) if k.strip() != '']
             phrases.append(temp)
-            self.phrases_[self.separator.join(temp)] = w
+            if self.separator.join(temp) not in self.phrases_ or (
+                    self.separator.join(temp) in self.phrases_ and len(w) < len(
+                self.phrases_[self.separator.join(temp)])):
+                self.phrases_[self.separator.join(temp)] = w
+        print(self.phrases_)
         self.tokenizer = nltk.MWETokenizer(phrases, separator=self.separator)
 
     def tokenize(self, itr):
