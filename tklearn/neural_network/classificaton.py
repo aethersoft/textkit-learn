@@ -11,8 +11,8 @@ from .base import KerasClassifier
 
 
 class FNNClassifier(KerasClassifier):
-    def __init__(self, hidden_dims, batch_size=16, epochs=8):
-        super(FNNClassifier, self).__init__(batch_size, epochs)
+    def __init__(self, hidden_dims, batch_size=16, epochs=8, multilabel=False):
+        super(FNNClassifier, self).__init__(batch_size, epochs, multilabel)
         self.hidden_dims = hidden_dims
 
     def preprocess(self, X, y=None):
@@ -58,7 +58,7 @@ class FNNClassifier(KerasClassifier):
 
 class CNNClassifier(KerasClassifier):
     def __init__(self, filters=250, kernel_size=3, pooling=None, dropout=None, hidden_dims=None, trainable=False,
-                 batch_size=32, epochs=15):
+                 batch_size=32, epochs=15, multilabel=False):
         """
         Initializes the classifier
 
@@ -71,7 +71,7 @@ class CNNClassifier(KerasClassifier):
         :param batch_size: Number of samples per gradient update. If unspecified, it will default to 32.
         :param epochs: Number of epochs to train the model. An epoch is an iteration over the entire x and y data provided.
         """
-        super(CNNClassifier, self).__init__(batch_size, epochs)
+        super(CNNClassifier, self).__init__(batch_size, epochs, multilabel)
         self.filters = filters
         self.pooling = pooling
         self.dropout = dropout
@@ -150,8 +150,8 @@ class CNNClassifier(KerasClassifier):
 
 
 class LSTMClassifier(KerasClassifier):
-    def __init__(self, trainable=False, lstm_units=150, hidden_dims=None, batch_size=16, epochs=8):
-        super(LSTMClassifier, self).__init__(batch_size, epochs)
+    def __init__(self, trainable=False, lstm_units=150, hidden_dims=None, batch_size=16, epochs=8, multilabel=False):
+        super(LSTMClassifier, self).__init__(batch_size, epochs, multilabel)
         self.trainable = trainable
         self.hidden_dims = hidden_dims
         self.lstm_units = lstm_units
@@ -215,7 +215,7 @@ class LSTMClassifier(KerasClassifier):
 
 class CNNLSTMClassifier(KerasClassifier):
     def __init__(self, filters=250, kernel_size=3, pooling=None, dropout=None, lstm_units=300,
-                 pool_size=1, hidden_dims=None, trainable=False, batch_size=32, epochs=15):
+                 pool_size=1, hidden_dims=None, trainable=False, batch_size=32, epochs=15, multilabel=False):
         """
         Initializes the classifier
 
@@ -229,7 +229,7 @@ class CNNLSTMClassifier(KerasClassifier):
         :param batch_size: Number of samples per gradient update. If unspecified, it will default to 32.
         :param epochs: Number of epochs to train the model. An epoch is an iteration over the entire x and y data provided.
         """
-        super(CNNLSTMClassifier, self).__init__(batch_size, epochs)
+        super(CNNLSTMClassifier, self).__init__(batch_size, epochs, multilabel)
         self.filters = filters
         self.pooling = pooling
         self.pool_size = pool_size
@@ -315,7 +315,7 @@ class CNNLSTMClassifier(KerasClassifier):
 
 class LSTMCNNClassifier(KerasClassifier):
     def __init__(self, filters=250, kernel_size=3, pooling=None, dropout=None, lstm_units=300,
-                 hidden_dims=None, trainable=False, batch_size=32, epochs=15):
+                 hidden_dims=None, trainable=False, batch_size=32, epochs=15, multilabel=False):
         """
         Initializes the classifier
 
@@ -329,7 +329,7 @@ class LSTMCNNClassifier(KerasClassifier):
         :param batch_size: Number of samples per gradient update. If unspecified, it will default to 32.
         :param epochs: Number of epochs to train the model. An epoch is an iteration over the entire x and y data provided.
         """
-        super(LSTMCNNClassifier, self).__init__(batch_size, epochs)
+        super(LSTMCNNClassifier, self).__init__(batch_size, epochs, multilabel)
         self.filters = filters
         self.pooling = pooling
         self.dropout = dropout
