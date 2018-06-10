@@ -56,12 +56,11 @@ class FNNClassifier(KerasClassifier):
 
 
 class CNNClassifier(KerasClassifier):
-    def __init__(self, dense_dim=300, filters=250, kernel_size=3, pooling=None, dropout=None,
-                 hidden_dims=None, trainable=False, batch_size=32, epochs=15):
+    def __init__(self, filters=250, kernel_size=3, pooling=None, dropout=None, hidden_dims=None, trainable=False,
+                 batch_size=32, epochs=15):
         """
         Initializes the classifier
 
-        :param dense_dim: Dimension of the dense embedding.
         :param filters: Number output of filters in the convolution.
         :param kernel_size: Length of the 1D convolution window.
         :param pooling: Type of pooling; pooling is not done if None.
@@ -72,7 +71,6 @@ class CNNClassifier(KerasClassifier):
         :param epochs: Number of epochs to train the model. An epoch is an iteration over the entire x and y data provided.
         """
         super(CNNClassifier, self).__init__(batch_size, epochs)
-        self.dense_dim = dense_dim
         self.filters = filters
         self.pooling = pooling
         self.dropout = dropout
@@ -213,12 +211,11 @@ class LSTMClassifier(KerasClassifier):
 
 
 class CNNLSTMClassifier(KerasClassifier):
-    def __init__(self, dense_dim=300, filters=250, kernel_size=3, pooling=None, dropout=None, lstm_units=300,
+    def __init__(self,filters=250, kernel_size=3, pooling=None, dropout=None, lstm_units=300,
                  pool_size=1, hidden_dims=None, trainable=False, batch_size=32, epochs=15):
         """
         Initializes the classifier
 
-        :param dense_dim: Dimension of the dense embedding.
         :param filters: Number output of filters in the convolution.
         :param kernel_size: Length of the 1D convolution window.
         :param pooling: Type of pooling; pooling is not done if None.
@@ -230,7 +227,6 @@ class CNNLSTMClassifier(KerasClassifier):
         :param epochs: Number of epochs to train the model. An epoch is an iteration over the entire x and y data provided.
         """
         super(CNNLSTMClassifier, self).__init__(batch_size, epochs)
-        self.dense_dim = dense_dim
         self.filters = filters
         self.pooling = pooling
         self.pool_size = pool_size
@@ -314,12 +310,11 @@ class CNNLSTMClassifier(KerasClassifier):
 
 
 class LSTMCNNClassifier(KerasClassifier):
-    def __init__(self, dense_dim=300, filters=250, kernel_size=3, pooling=None, dropout=None, lstm_units=300,
+    def __init__(self, filters=250, kernel_size=3, pooling=None, dropout=None, lstm_units=300,
                  hidden_dims=None, trainable=False, batch_size=32, epochs=15):
         """
         Initializes the classifier
 
-        :param dense_dim: Dimension of the dense embedding.
         :param filters: Number output of filters in the convolution.
         :param kernel_size: Length of the 1D convolution window.
         :param pooling: Type of pooling; pooling is not done if None.
@@ -331,7 +326,6 @@ class LSTMCNNClassifier(KerasClassifier):
         :param epochs: Number of epochs to train the model. An epoch is an iteration over the entire x and y data provided.
         """
         super(LSTMCNNClassifier, self).__init__(batch_size, epochs)
-        self.dense_dim = dense_dim
         self.filters = filters
         self.pooling = pooling
         self.dropout = dropout
