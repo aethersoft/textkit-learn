@@ -2,6 +2,7 @@ import json
 import os
 from abc import ABC, abstractmethod
 
+import numpy as np
 from keras.models import model_from_json
 from sklearn.base import BaseEstimator, ClassifierMixin
 
@@ -42,6 +43,11 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         :param X: Testing vector
         :return: Predicted values
         """
+        y = self.predict_proba(X)
+        return np.argmax(y, axis=1, out=None)
+
+    # predicts probability output
+    def predict_proba(self, X):
         X, _ = self.preprocess(X)
         return self.model_.predict(X)
 
