@@ -21,10 +21,6 @@ class FNNRegressor(KerasRegressor):
         assert len(X) >= 1, 'Sample size should be grater than or equal to 1 found {}'.format(len(X))
         if not hasattr(self, 'num_features_'):
             self.num_features_ = len(X[0])
-        if y is not None:
-            y = to_categorical(y)
-            if not hasattr(self, 'num_labels_'):
-                self.num_labels_ = len(y[0])
         return X, y
 
     def build_model(self, X, y):
@@ -94,10 +90,6 @@ class CNNRegressor(KerasRegressor):
             self.vocab_size_ = self.embedding_matrix_.shape[0]
         if not hasattr(self, 'sequence_length_'):
             self.sequence_length_ = X['tokens'].shape[1]
-        if not hasattr(self, 'num_categories_'):
-            self.num_categories_ = len(np.unique(y))
-        if y is not None:
-            y = to_categorical(y)
         X = X['tokens']
         return X, y
 
@@ -169,10 +161,6 @@ class LSTMRegressor(KerasRegressor):
             self.sequence_length_ = tokens.shape[1]
         if not hasattr(self, 'vocab_size_'):
             self.vocab_size_ = self.embedding_matrix_.shape[0]
-        if not hasattr(self, 'num_labels_'):
-            self.num_labels_ = len(np.unique(y))
-        if y is not None:
-            y = to_categorical(y)
         return tokens, y
 
     def build_model(self, X, y):
@@ -252,10 +240,6 @@ class CNNLSTMRegressor(KerasRegressor):
             self.vocab_size_ = self.embedding_matrix_.shape[0]
         if not hasattr(self, 'sequence_length_'):
             self.sequence_length_ = X['tokens'].shape[1]
-        if not hasattr(self, 'num_categories_'):
-            self.num_categories_ = len(np.unique(y))
-        if y is not None:
-            y = to_categorical(y)
         X = X['tokens']
         return X, y
 
