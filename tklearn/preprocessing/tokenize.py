@@ -83,7 +83,6 @@ class DictionaryTokenizer(Tokenizer):
                     self.separator.join(temp) in self.phrases_ and len(w) < len(
                 self.phrases_[self.separator.join(temp)])):
                 self.phrases_[self.separator.join(temp)] = w
-        print(self.phrases_)
         self.tokenizer = nltk.MWETokenizer(phrases, separator=self.separator)
 
     def tokenize(self, itr):
