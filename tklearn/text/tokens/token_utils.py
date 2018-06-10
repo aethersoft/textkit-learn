@@ -110,5 +110,5 @@ def build_vocabulary(*args, **kwargs):
     (defaults to tweet tokenizer)
     :return: Vocabulary
     """
-    tokenizer = kwargs['tokenizer'] if kwargs['tokenizer'] else lambda x: x.split(' ')
-    return [k for t in args for k in tokenizer.tokenize(t)]
+    tokenize = kwargs['tokenizer'].tokenize if 'tokenizer' in kwargs else lambda x: x.split(' ')
+    return [k for t in args for k in tokenize(t)]
