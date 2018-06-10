@@ -84,3 +84,7 @@ def merge_dicts(*dicts):
     for i in range(1, len(dicts)):
         z.update(dicts[i])
     return z
+
+
+def parallel_sort(*args):
+    return [list(t) for t in zip(*sorted(zip(*args), key=lambda x: x[0]))]
