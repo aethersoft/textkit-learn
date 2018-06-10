@@ -7,12 +7,15 @@ from keras.models import model_from_json
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 
 
+# ======================================================================================================================
+# Classifier -----------------------------------------------------------------------------------------------------------
+
 class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
     """
     An more abstract version of KerasClassifier for scikit-learn with custom preprocess pipeline.
     """
 
-    def __init__(self, batch_size=16, epochs=8):
+    def __init__(self, batch_size=16, epochs=8, multilabel=False):
         """
         Initialize the Classifier.
 
@@ -21,6 +24,7 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         """
         self.batch_size = batch_size
         self.epochs = epochs
+        self.multilabel = multilabel
 
     def fit(self, X, y=None):
         """
@@ -44,7 +48,7 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         :return: Predicted values
         """
         y = self.predict_proba(X)
-        return np.argmax(y, axis=1, out=None)
+        return y if self.multilabel else np.argmax(y, axis=1, out=None)
 
     # predicts probability output
     def predict_proba(self, X):
@@ -140,6 +144,9 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
     def __setstate__(self, state):
         pass
 
+
+# ======================================================================================================================
+# Regressor ------------------------------------------------------------------------------------------------------------
 
 class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
     """

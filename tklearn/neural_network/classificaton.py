@@ -22,9 +22,10 @@ class FNNClassifier(KerasClassifier):
         if not hasattr(self, 'num_features_'):
             self.num_features_ = len(X[0])
         if y is not None:
-            y = to_categorical(y)
-            if not hasattr(self, 'num_labels_'):
-                self.num_labels_ = len(y[0])
+            if not self.multilabel:
+                y = to_categorical(y)
+            if not hasattr(self, 'num_categories_'):
+                self.num_categories_ = len(y[0])
         return X, y
 
     def build_model(self, X, y):
@@ -48,7 +49,7 @@ class FNNClassifier(KerasClassifier):
                 model.add(Dense(dim, activation='relu'))
 
         # Output layer with sigmoid activation:
-        model.add(Dense(self.num_labels_, activation='softmax'))
+        model.add(Dense(self.num_categories_, activation='softmax'))
 
         # Compile the model before use
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
@@ -94,10 +95,11 @@ class CNNClassifier(KerasClassifier):
             self.vocab_size_ = self.embedding_matrix_.shape[0]
         if not hasattr(self, 'sequence_length_'):
             self.sequence_length_ = X['tokens'].shape[1]
-        if not hasattr(self, 'num_categories_'):
-            self.num_categories_ = len(np.unique(y))
         if y is not None:
-            y = to_categorical(y)
+            if not self.multilabel:
+                y = to_categorical(y)
+            if not hasattr(self, 'num_categories_'):
+                self.num_categories_ = len(y[0])
         X = X['tokens']
         return X, y
 
@@ -169,10 +171,11 @@ class LSTMClassifier(KerasClassifier):
             self.sequence_length_ = tokens.shape[1]
         if not hasattr(self, 'vocab_size_'):
             self.vocab_size_ = self.embedding_matrix_.shape[0]
-        if not hasattr(self, 'num_labels_'):
-            self.num_labels_ = len(np.unique(y))
         if y is not None:
-            y = to_categorical(y)
+            if not self.multilabel:
+                y = to_categorical(y)
+            if not hasattr(self, 'num_categories_'):
+                self.num_categories_ = len(y[0])
         return tokens, y
 
     def build_model(self, X, y):
@@ -203,7 +206,7 @@ class LSTMClassifier(KerasClassifier):
                 model.add(Dense(dim, activation='relu'))
 
         # Output layer with sigmoid activation:
-        model.add(Dense(self.num_labels_, activation='softmax'))
+        model.add(Dense(self.num_categories_, activation='softmax'))
 
         # Compile the model before use
         model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
@@ -252,10 +255,11 @@ class CNNLSTMClassifier(KerasClassifier):
             self.vocab_size_ = self.embedding_matrix_.shape[0]
         if not hasattr(self, 'sequence_length_'):
             self.sequence_length_ = X['tokens'].shape[1]
-        if not hasattr(self, 'num_categories_'):
-            self.num_categories_ = len(np.unique(y))
         if y is not None:
-            y = to_categorical(y)
+            if not self.multilabel:
+                y = to_categorical(y)
+            if not hasattr(self, 'num_categories_'):
+                self.num_categories_ = len(y[0])
         X = X['tokens']
         return X, y
 
@@ -350,10 +354,12 @@ class LSTMCNNClassifier(KerasClassifier):
             self.vocab_size_ = self.embedding_matrix_.shape[0]
         if not hasattr(self, 'sequence_length_'):
             self.sequence_length_ = X['tokens'].shape[1]
-        if not hasattr(self, 'num_categories_'):
-            self.num_categories_ = len(np.unique(y))
         if y is not None:
-            y = to_categorical(y)
+            if not self.multilabel:
+                y = to_categorical(y)
+            if not hasattr(self, 'num_categories_'):
+                self.num_categories_ = len(y[0])
+        X = X['tokens']
         X = X['tokens']
         return X, y
 
