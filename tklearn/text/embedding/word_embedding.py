@@ -19,12 +19,17 @@ class WordEmbedding:
     def vector_size(self):
         return self._vector_size
 
+    @property
+    def vocabulary(self):
+        if isinstance(self.word_embedding, pd.DataFrame):
+            raise NotImplementedError
+        return self.word_embedding.vocab
+
     def __getitem__(self, item):
         try:
             if isinstance(self.word_embedding, pd.DataFrame):
                 return np.array(self.word_embedding.loc[item].as_matrix())
             return self.word_embedding[item]
-
         except KeyError:
             return None
 
