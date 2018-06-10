@@ -104,7 +104,7 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         with open(model_path, 'w') as f:
             f.write(self.model_.to_json())
         with open(args_path, 'w') as f:
-            json.dump({'batch_size': self.batch_size, 'epochs': self.epochs}, f)
+            json.dump({'batch_size': self.batch_size, 'epochs': self.epochs, 'multilabel': self.multilabel}, f)
 
     def load(self, filepath):
         """
@@ -128,6 +128,7 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
             kwargs = json.load(f)
             self.batch_size = kwargs['batch_size']
             self.epochs = kwargs['epochs']
+            self.multilabel = kwargs['multilabel']
 
     @abstractmethod
     def preprocess(self, X, y=None):
