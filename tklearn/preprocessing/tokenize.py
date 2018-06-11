@@ -74,18 +74,18 @@ class DictionaryTokenizer(Tokenizer):
         self.initialize()
 
     def initialize(self):
-        phrases = []
-        self.phrases_ = {}
+        self.phrases_ = []
+        self.phrase2vocab_ = {}
         for w in self.vocabulary:
             temp = [k for k in re.split('(\W)', re.sub(r'_', ' ', w)) if k.strip() != '']
-            phrases.append(temp)
-            if self.separator.join(temp) not in self.phrases_ or (
-                    self.separator.join(temp) in self.phrases_ and len(w) < len(
-                self.phrases_[self.separator.join(temp)])):
-                self.phrases_[self.separator.join(temp)] = w
-        self.tokenizer = nltk.MWETokenizer(phrases, separator=self.separator)
+            self.phrases_.append(temp)
+            if self.separator.join(temp) not in self.phrase2vocab_ or (
+                    self.separator.join(temp) in self.phrase2vocab_ and len(w) < len(
+                self.phrase2vocab_[self.separator.join(temp)])):
+                self.phrase2vocab_[self.separator.join(temp)] = w
 
     def tokenize(self, itr):
+        tokenizer = nltk.MWETokenizer(self.phrases_, separator=self.separator)
         return [
-            [self.phrases_[t] for t in self.tokenizer.tokenize([k for k in re.split('(\W)', text) if k.strip() != ''])
-             if t in self.phrases_.keys()] for text in itr]
+            [self.phrase2vocab_[t] for t in tokenizer.tokenize([k for k in re.split('(\W)', text) if k.strip() != ''])
+             if t in self.phrase2vocab_.keys()] for text in itr]
