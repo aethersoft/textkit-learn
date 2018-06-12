@@ -318,7 +318,7 @@ class CNNLSTMClassifier(KerasClassifier):
 
 class LSTMCNNClassifier(KerasClassifier):
     def __init__(self, filters=250, kernel_size=3, pooling=None, dropout=None, lstm_units=300,
-                 hidden_dims=None, trainable=False, batch_size=32, epochs=15, multilabel=False):
+                 hidden_dims=None, trainable=False, batch_size=32, epochs=15, output='classify'):
         """
         Initializes the classifier
 
@@ -332,7 +332,7 @@ class LSTMCNNClassifier(KerasClassifier):
         :param batch_size: Number of samples per gradient update. If unspecified, it will default to 32.
         :param epochs: Number of epochs to train the model. An epoch is an iteration over the entire x and y data provided.
         """
-        super(LSTMCNNClassifier, self).__init__(batch_size, epochs, multilabel)
+        super(LSTMCNNClassifier, self).__init__(batch_size, epochs, output)
         self.filters = filters
         self.pooling = pooling
         self.dropout = dropout
