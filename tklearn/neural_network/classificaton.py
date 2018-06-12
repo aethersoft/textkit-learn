@@ -11,8 +11,8 @@ from .base import KerasClassifier
 
 
 class FNNClassifier(KerasClassifier):
-    def __init__(self, hidden_dims, batch_size=16, epochs=8, multilabel=False):
-        super(FNNClassifier, self).__init__(batch_size, epochs, multilabel)
+    def __init__(self, hidden_dims, batch_size=16, epochs=8, output='classify'):
+        super(FNNClassifier, self).__init__(batch_size, epochs, output)
         self.hidden_dims = hidden_dims
 
     def preprocess(self, X, y=None):
@@ -22,7 +22,7 @@ class FNNClassifier(KerasClassifier):
         if not hasattr(self, 'num_features_'):
             self.num_features_ = len(X[0])
         if y is not None:
-            if not self.multilabel:
+            if not self.output == 'multilabel':
                 y = to_categorical(y)
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
@@ -58,7 +58,7 @@ class FNNClassifier(KerasClassifier):
 
 class CNNClassifier(KerasClassifier):
     def __init__(self, filters=250, kernel_size=3, pooling=None, dropout=None, hidden_dims=None, trainable=False,
-                 batch_size=32, epochs=15, multilabel=False):
+                 batch_size=32, epochs=15, output='classify'):
         """
         Initializes the classifier
 
@@ -71,7 +71,7 @@ class CNNClassifier(KerasClassifier):
         :param batch_size: Number of samples per gradient update. If unspecified, it will default to 32.
         :param epochs: Number of epochs to train the model. An epoch is an iteration over the entire x and y data provided.
         """
-        super(CNNClassifier, self).__init__(batch_size, epochs, multilabel)
+        super(CNNClassifier, self).__init__(batch_size, epochs, output)
         self.filters = filters
         self.pooling = pooling
         self.dropout = dropout
@@ -96,7 +96,7 @@ class CNNClassifier(KerasClassifier):
         if not hasattr(self, 'sequence_length_'):
             self.sequence_length_ = X['tokens'].shape[1]
         if y is not None:
-            if not self.multilabel:
+            if not self.output == 'multilabel':
                 y = to_categorical(y)
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
@@ -135,12 +135,15 @@ class CNNClassifier(KerasClassifier):
             opt = d0(opt)
 
         # Hidden layers
-        for dim in self.hidden_dims:
-            l0 = Dense(dim, activation='relu')
+        for idx, dim in enumerate(self.hidden_dims):
+            if len(self.hidden_dims) - 1 == idx:
+                l0 = Dense(dim, activation='relu', name='feature_layer')
+            else:
+                l0 = Dense(dim, activation='relu')
             opt = l0(opt)
 
         # Output layer with sigmoid activation:
-        opt = Dense(self.num_categories_, activation='softmax')(opt)
+        opt = Dense(self.num_categories_, activation='softmax', name="dense_three")(opt)
 
         model = Model(inputs=ipt, outputs=opt)
 
@@ -150,8 +153,8 @@ class CNNClassifier(KerasClassifier):
 
 
 class LSTMClassifier(KerasClassifier):
-    def __init__(self, trainable=False, lstm_units=150, hidden_dims=None, batch_size=16, epochs=8, multilabel=False):
-        super(LSTMClassifier, self).__init__(batch_size, epochs, multilabel)
+    def __init__(self, trainable=False, lstm_units=150, hidden_dims=None, batch_size=16, epochs=8, output='classify'):
+        super(LSTMClassifier, self).__init__(batch_size, epochs, output)
         self.trainable = trainable
         self.hidden_dims = hidden_dims
         self.lstm_units = lstm_units
@@ -172,7 +175,7 @@ class LSTMClassifier(KerasClassifier):
         if not hasattr(self, 'vocab_size_'):
             self.vocab_size_ = self.embedding_matrix_.shape[0]
         if y is not None:
-            if not self.multilabel:
+            if not self.output == 'multilabel':
                 y = to_categorical(y)
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
@@ -215,7 +218,7 @@ class LSTMClassifier(KerasClassifier):
 
 class CNNLSTMClassifier(KerasClassifier):
     def __init__(self, filters=250, kernel_size=3, pooling=None, dropout=None, lstm_units=300,
-                 pool_size=1, hidden_dims=None, trainable=False, batch_size=32, epochs=15, multilabel=False):
+                 pool_size=1, hidden_dims=None, trainable=False, batch_size=32, epochs=15, output='classify'):
         """
         Initializes the classifier
 
@@ -229,7 +232,7 @@ class CNNLSTMClassifier(KerasClassifier):
         :param batch_size: Number of samples per gradient update. If unspecified, it will default to 32.
         :param epochs: Number of epochs to train the model. An epoch is an iteration over the entire x and y data provided.
         """
-        super(CNNLSTMClassifier, self).__init__(batch_size, epochs, multilabel)
+        super(CNNLSTMClassifier, self).__init__(batch_size, epochs, output)
         self.filters = filters
         self.pooling = pooling
         self.pool_size = pool_size
@@ -256,7 +259,7 @@ class CNNLSTMClassifier(KerasClassifier):
         if not hasattr(self, 'sequence_length_'):
             self.sequence_length_ = X['tokens'].shape[1]
         if y is not None:
-            if not self.multilabel:
+            if not self.output == 'multilabel':
                 y = to_categorical(y)
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
@@ -355,11 +358,10 @@ class LSTMCNNClassifier(KerasClassifier):
         if not hasattr(self, 'sequence_length_'):
             self.sequence_length_ = X['tokens'].shape[1]
         if y is not None:
-            if not self.multilabel:
+            if not self.output == 'multilabel':
                 y = to_categorical(y)
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
-        X = X['tokens']
         X = X['tokens']
         return X, y
 

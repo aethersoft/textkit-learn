@@ -3,6 +3,7 @@ import os
 from abc import ABC, abstractmethod
 
 import numpy as np
+from keras import Model
 from keras.models import model_from_json
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 
@@ -15,7 +16,7 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
     An more abstract version of KerasClassifier for scikit-learn with custom preprocess pipeline.
     """
 
-    def __init__(self, batch_size=16, epochs=8, multilabel=False):
+    def __init__(self, batch_size=16, epochs=8, output='classify'):
         """
         Initialize the Classifier.
 
@@ -24,7 +25,7 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         """
         self.batch_size = batch_size
         self.epochs = epochs
-        self.multilabel = multilabel
+        self.output = output
 
     def fit(self, X, y=None):
         """
@@ -47,8 +48,11 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         :param X: Testing vector
         :return: Predicted values
         """
+        if self.output == 'features':
+            X, _ = self.preprocess(X)
+            return self._features().predict(X)
         y = self.predict_proba(X)
-        return y if self.multilabel else np.argmax(y, axis=1, out=None)
+        return y if self.output == 'multilabel' else np.argmax(y, axis=1, out=None)
 
     # predicts probability output
     def predict_proba(self, X):
@@ -104,7 +108,7 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         with open(model_path, 'w') as f:
             f.write(self.model_.to_json())
         with open(args_path, 'w') as f:
-            json.dump({'batch_size': self.batch_size, 'epochs': self.epochs, 'multilabel': self.multilabel}, f)
+            json.dump({'batch_size': self.batch_size, 'epochs': self.epochs, 'output': self.output}, f)
 
     def load(self, filepath):
         """
@@ -128,7 +132,7 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
             kwargs = json.load(f)
             self.batch_size = kwargs['batch_size']
             self.epochs = kwargs['epochs']
-            self.multilabel = kwargs['multilabel']
+            self.output = kwargs['output']
 
     @abstractmethod
     def preprocess(self, X, y=None):
@@ -145,6 +149,10 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
     def __setstate__(self, state):
         pass
 
+    def _features(self):
+        intermediate_layer_model = Model(inputs=self.model_.input, outputs=self.model_.get_layer('feature_layer').output)
+        return intermediate_layer_model
+
 
 # ======================================================================================================================
 # Regressor ------------------------------------------------------------------------------------------------------------
@@ -154,7 +162,7 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
     An more abstract version of KerasRegressor for scikit-learn with custom preprocess pipeline.
     """
 
-    def __init__(self, batch_size=16, epochs=8):
+    def __init__(self, batch_size=16, epochs=8, output='predict'):
         """
         Initialize the Regressor.
 
@@ -163,6 +171,7 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
         """
         self.batch_size = batch_size
         self.epochs = epochs
+        self.output = output
 
     def fit(self, X, y=None):
         """
@@ -186,6 +195,8 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
         :return: Predicted values
         """
         X, _ = self.preprocess(X)
+        if self.output == 'features':
+            return self._features().predict(X)
         return self.model_.predict(X)
 
     def score(self, X, y, sample_weight=None):
@@ -237,7 +248,7 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
         with open(model_path, 'w') as f:
             f.write(self.model_.to_json())
         with open(args_path, 'w') as f:
-            json.dump({'batch_size': self.batch_size, 'epochs': self.epochs}, f)
+            json.dump({'batch_size': self.batch_size, 'epochs': self.epochs, 'output': self.output}, f)
 
     def load(self, filepath):
         """
@@ -261,6 +272,7 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
             kwargs = json.load(f)
             self.batch_size = kwargs['batch_size']
             self.epochs = kwargs['epochs']
+            self.output = kwargs['output']
 
     @abstractmethod
     def preprocess(self, X, y=None):
@@ -276,3 +288,8 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
 
     def __setstate__(self, state):
         pass
+
+    def _features(self):
+        intermediate_layer_model = Model(inputs=self.model_.input,
+                                         outputs=self.model_.get_layer('feature_layer').output)
+        return intermediate_layer_model
