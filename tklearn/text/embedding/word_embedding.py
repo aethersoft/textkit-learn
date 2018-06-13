@@ -52,7 +52,7 @@ def load_word2vec(data_file, binary=True, unicode_errors='ignore', verbose=False
     :return: Binary Word2Vec
     """
     if not binary:
-        model = gensim.models.Word2Vec.load('300features_40minwords_10context.txt')
+        model = gensim.models.Word2Vec.load(data_file)
         w2v = model.wv
     else:
         w2v = gensim.models.KeyedVectors.load_word2vec_format(data_file, binary=binary, unicode_errors=unicode_errors)
