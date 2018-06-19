@@ -1,4 +1,6 @@
+import errno
 import json
+import os
 
 import requests
 from sklearn.externals import joblib
@@ -77,7 +79,7 @@ def load_pipeline(path):
     :param path: Path to the sci-kit learn pipeline.
     :return: pipeline to save
     """
-    pipeline = joblib.load('{}.pkl'.format(path))
+    pipeline = joblib.load(os.path.join(path, 'pipe.pkl'))
     if hasattr(pipeline.steps[-1][-1], 'load'):
         pipeline.steps[-1][-1].load(path)
     return pipeline
@@ -91,6 +93,12 @@ def save_pipeline(path, pipeline):
     :param pipeline: pipeline to save
     :return:
     """
-    joblib.dump(pipeline, '{}.pkl'.format(path))
+    try:
+        # Create the folder if not exist
+        os.makedirs(path)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+    joblib.dump(pipeline, os.path.join(path, 'pipe.pkl'))
     if hasattr(pipeline.steps[-1][-1], 'save'):
         pipeline.steps[-1][-1].save(path)

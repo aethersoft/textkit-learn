@@ -11,8 +11,10 @@ from .base import KerasRegressor
 
 
 class FNNRegressor(KerasRegressor):
-    def __init__(self, hidden_dims, batch_size=16, epochs=8):
+    def __init__(self, hidden_dims=None, batch_size=16, epochs=8):
         super(FNNRegressor, self).__init__(batch_size, epochs)
+        if hidden_dims is None:
+            hidden_dims = []
         self.hidden_dims = hidden_dims
 
     def preprocess(self, X, y=None):
@@ -35,7 +37,7 @@ class FNNRegressor(KerasRegressor):
 
         for dim in self.hidden_dims:
             # Hidden layer:
-            if isinstance(dim, tuple):
+            if isinstance(dim, tuple) or isinstance(dim, list):
                 assert len(dim) == 2, 'Invalid parameter input valued \'{}\' for hidden dimensions. ' \
                                       'This parameter can be an integer or a tuple of dimension 2.'.format(dim)
                 model.add(Dense(dim[0], activation='relu'))
@@ -52,7 +54,7 @@ class FNNRegressor(KerasRegressor):
 
 
 class CNNRegressor(KerasRegressor):
-    def __init__(self, filters=250, kernel_size=3, pooling=None, dropout=None,
+    def __init__(self, filters=250, kernel_size=3, pooling='max', dropout=None,
                  hidden_dims=None, trainable=False, batch_size=32, epochs=15):
         """
         Initializes the classifier
@@ -182,7 +184,7 @@ class LSTMRegressor(KerasRegressor):
         # MLPs
         for dim in self.hidden_dims:
             # Hidden layer:
-            if isinstance(dim, tuple):
+            if isinstance(dim, tuple) or isinstance(dim, list):
                 assert len(dim) == 2, 'Invalid parameter input valued \'{}\' for hidden dimensions. ' \
                                       'This parameter can be an integer or a tuple of dimension 2.'.format(dim)
                 model.add(Dense(dim[0], activation='relu'))
@@ -199,7 +201,7 @@ class LSTMRegressor(KerasRegressor):
 
 
 class CNNLSTMRegressor(KerasRegressor):
-    def __init__(self, filters=250, kernel_size=3, pooling=None, dropout=None, lstm_units=300,
+    def __init__(self, filters=250, kernel_size=3, pooling='max', dropout=None, lstm_units=300,
                  pool_size=1, hidden_dims=None, trainable=False, batch_size=32, epochs=15):
         """
         Initializes the classifier
@@ -294,7 +296,7 @@ class CNNLSTMRegressor(KerasRegressor):
 
 
 class LSTMCNNRegressor(KerasRegressor):
-    def __init__(self, filters=250, kernel_size=3, pooling=None, dropout=None, lstm_units=300,
+    def __init__(self, filters=250, kernel_size=3, pooling='max', dropout=None, lstm_units=300,
                  hidden_dims=None, trainable=False, batch_size=32, epochs=15):
         """
         Initializes the classifier

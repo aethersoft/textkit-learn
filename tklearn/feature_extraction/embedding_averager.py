@@ -37,6 +37,7 @@ class EmbeddingAverager(BaseEstimator, TransformerMixin):
         self.embeddings_ = EmbeddingExtractor(self.word_vectors, self.vocab, self.word_features, self.vocab_size,
                                               self.pad_sequences, self.default)
         self.embeddings_.fit(X)
+        self.word_vectors = None
         return self
 
     def transform(self, X, *_):

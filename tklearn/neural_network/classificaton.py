@@ -11,8 +11,10 @@ from .base import KerasClassifier
 
 
 class FNNClassifier(KerasClassifier):
-    def __init__(self, hidden_dims, batch_size=16, epochs=8, output='classify'):
+    def __init__(self, hidden_dims=None, batch_size=16, epochs=8, output='classify'):
         super(FNNClassifier, self).__init__(batch_size, epochs, output)
+        if hidden_dims is None:
+            hidden_dims = []
         self.hidden_dims = hidden_dims
 
     def preprocess(self, X, y=None):
@@ -22,7 +24,7 @@ class FNNClassifier(KerasClassifier):
         if not hasattr(self, 'num_features_'):
             self.num_features_ = len(X[0])
         if y is not None:
-            if not self.output == 'multilabel':
+            if not self.output == 'multilabel' and not self.output == 'multiclass':
                 y = to_categorical(y)
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
@@ -40,7 +42,7 @@ class FNNClassifier(KerasClassifier):
 
         for dim in self.hidden_dims:
             # Hidden layer:
-            if isinstance(dim, tuple):
+            if isinstance(dim, tuple) or isinstance(dim, list):
                 assert len(dim) == 2, 'Invalid parameter input valued \'{}\' for hidden dimensions. ' \
                                       'This parameter can be an integer or a tuple of dimension 2.'.format(dim)
                 model.add(Dense(dim[0], activation='relu'))
@@ -57,7 +59,7 @@ class FNNClassifier(KerasClassifier):
 
 
 class CNNClassifier(KerasClassifier):
-    def __init__(self, filters=250, kernel_size=3, pooling=None, dropout=None, hidden_dims=None, trainable=False,
+    def __init__(self, filters=250, kernel_size=3, pooling='max', dropout=None, hidden_dims=None, trainable=False,
                  batch_size=32, epochs=15, output='classify'):
         """
         Initializes the classifier
@@ -89,6 +91,7 @@ class CNNClassifier(KerasClassifier):
             self.kernel_size = [self.kernel_size]
 
     def preprocess(self, X, y=None):
+
         if not hasattr(self, 'embedding_matrix_'):
             self.embedding_matrix_ = X['embedding_matrix']
         if not hasattr(self, 'vocab_size_'):
@@ -96,7 +99,7 @@ class CNNClassifier(KerasClassifier):
         if not hasattr(self, 'sequence_length_'):
             self.sequence_length_ = X['tokens'].shape[1]
         if y is not None:
-            if not self.output == 'multilabel':
+            if not self.output == 'multilabel' and not self.output == 'multiclass':
                 y = to_categorical(y)
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
@@ -143,7 +146,7 @@ class CNNClassifier(KerasClassifier):
             opt = l0(opt)
 
         # Output layer with sigmoid activation:
-        opt = Dense(self.num_categories_, activation='softmax', name="dense_three")(opt)
+        opt = Dense(self.num_categories_, activation='softmax')(opt)
 
         model = Model(inputs=ipt, outputs=opt)
 
@@ -175,7 +178,7 @@ class LSTMClassifier(KerasClassifier):
         if not hasattr(self, 'vocab_size_'):
             self.vocab_size_ = self.embedding_matrix_.shape[0]
         if y is not None:
-            if not self.output == 'multilabel':
+            if not self.output == 'multilabel' and not self.output == 'multiclass':
                 y = to_categorical(y)
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
@@ -200,7 +203,7 @@ class LSTMClassifier(KerasClassifier):
         # MLPs
         for dim in self.hidden_dims:
             # Hidden layer:
-            if isinstance(dim, tuple):
+            if isinstance(dim, tuple) or isinstance(dim, list):
                 assert len(dim) == 2, 'Invalid parameter input valued \'{}\' for hidden dimensions. ' \
                                       'This parameter can be an integer or a tuple of dimension 2.'.format(dim)
                 model.add(Dense(dim[0], activation='relu'))
@@ -217,7 +220,7 @@ class LSTMClassifier(KerasClassifier):
 
 
 class CNNLSTMClassifier(KerasClassifier):
-    def __init__(self, filters=250, kernel_size=3, pooling=None, dropout=None, lstm_units=300,
+    def __init__(self, filters=250, kernel_size=3, pooling='max', dropout=None, lstm_units=300,
                  pool_size=1, hidden_dims=None, trainable=False, batch_size=32, epochs=15, output='classify'):
         """
         Initializes the classifier
@@ -259,7 +262,7 @@ class CNNLSTMClassifier(KerasClassifier):
         if not hasattr(self, 'sequence_length_'):
             self.sequence_length_ = X['tokens'].shape[1]
         if y is not None:
-            if not self.output == 'multilabel':
+            if not self.output == 'multilabel' and not self.output == 'multiclass':
                 y = to_categorical(y)
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
@@ -317,7 +320,7 @@ class CNNLSTMClassifier(KerasClassifier):
 
 
 class LSTMCNNClassifier(KerasClassifier):
-    def __init__(self, filters=250, kernel_size=3, pooling=None, dropout=None, lstm_units=300,
+    def __init__(self, filters=250, kernel_size=3, pooling='max', dropout=None, lstm_units=300,
                  hidden_dims=None, trainable=False, batch_size=32, epochs=15, output='classify'):
         """
         Initializes the classifier
@@ -358,7 +361,7 @@ class LSTMCNNClassifier(KerasClassifier):
         if not hasattr(self, 'sequence_length_'):
             self.sequence_length_ = X['tokens'].shape[1]
         if y is not None:
-            if not self.output == 'multilabel':
+            if not self.output == 'multilabel' and not self.output == 'multiclass':
                 y = to_categorical(y)
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])

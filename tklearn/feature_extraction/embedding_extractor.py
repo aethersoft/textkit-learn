@@ -92,29 +92,32 @@ class EmbeddingExtractor(BaseEstimator, TransformerMixin):
         :return: self
         """
         # build word frequency
-        self.word_freq_ = Counter()
+        assert self.word_vectors is not None, 'Failed to extract word embeddings without proper word vector.'
+        word_freq = Counter()
         if self.vocab is None:
             for tokens in X:
                 for token in tokens:
-                    self.word_freq_[token] += 1
+                    word_freq[token] += 1
         else:
             for tokens in self.vocab:
                 if isinstance(tokens, list):
                     for token in tokens:
-                        self.word_freq_[token] += 1
+                        word_freq[token] += 1
                 else:
-                    self.word_freq_[tokens] += 1
+                    word_freq[tokens] += 1
         # Build word index
         self.word_index_ = dict()
         if self.vocab_size is None:
-            frq_words = self.word_freq_.most_common()
+            frq_words = word_freq.most_common()
         else:
-            frq_words = self.word_freq_.most_common(self.vocab_size - 1)
+            frq_words = word_freq.most_common(self.vocab_size - 1)
         idx_ = 1
         for token, _ in frq_words:
             self.word_index_[token] = idx_
             idx_ += 1
         self._build_embedding_matrix(X)
+        self.word_vectors = None
+        self.vocab = None
         return self
 
     def transform(self, X, *_):

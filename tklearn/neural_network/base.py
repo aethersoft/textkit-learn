@@ -48,11 +48,11 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         :param X: Testing vector
         :return: Predicted values
         """
-        if self.output == 'features':
+        if hasattr(self, '_transfer'):
             X, _ = self.preprocess(X)
-            return self._features().predict(X)
+            return self._features(self._tlayer if hasattr(self, '_tlayer') else None).predict(X)
         y = self.predict_proba(X)
-        return y if self.output == 'multilabel' else np.argmax(y, axis=1, out=None)
+        return y if self.output == 'multilabel' else np.argmax(y, axis=1, out=None)  # multiclass/binary
 
     # predicts probability output
     def predict_proba(self, X):
@@ -93,15 +93,15 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         """
         pass
 
-    def save(self, filepath):
+    def save(self, path):
         """
         Saves the model weights in a file provided by path
         :type filepath: path to the file
         :return: status
         """
-        model_path = filepath + '_model.json'
-        weights_path = filepath + '_weights.h5'
-        args_path = filepath + '_args.json'
+        model_path = os.path.join(path, 'model.json')
+        weights_path = os.path.join(path, 'weights.h5')
+        args_path = os.path.join(path, 'args.json')
         # Save the weights
         self.model_.save_weights(weights_path)
         # Save the model architecture
@@ -110,15 +110,15 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         with open(args_path, 'w') as f:
             json.dump({'batch_size': self.batch_size, 'epochs': self.epochs, 'output': self.output}, f)
 
-    def load(self, filepath):
+    def load(self, path):
         """
         Loads model from the filepath
         :type filepath: path to the file
         :return: Saved model
         """
-        model_path = filepath + '_model.json'
-        weights_path = filepath + '_weights.h5'
-        args_path = filepath + '_args.json'
+        model_path = os.path.join(path, 'model.json')
+        weights_path = os.path.join(path, 'weights.h5')
+        args_path = os.path.join(path, 'args.json')
         if not os.path.isfile(model_path):
             raise IOError('Ca\'t find models in \'{}\''.format(model_path))
         if not os.path.isfile(weights_path):
@@ -149,8 +149,15 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
     def __setstate__(self, state):
         pass
 
-    def _features(self):
-        intermediate_layer_model = Model(inputs=self.model_.input, outputs=self.model_.get_layer('feature_layer').output)
+    def transfer(self, status, layer=None):
+        self._transfer = status
+        self._tlayer = layer
+
+    def _features(self, layer_name=None):
+        if layer_name is None:
+            layer_name = self.model_.layers[-2].name
+        intermediate_layer_model = Model(inputs=self.model_.input,
+                                         outputs=self.model_.get_layer(layer_name).output)
         return intermediate_layer_model
 
 
@@ -195,8 +202,8 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
         :return: Predicted values
         """
         X, _ = self.preprocess(X)
-        if self.output == 'features':
-            return self._features().predict(X)
+        if hasattr(self, '_transfer'):
+            return self._features(self._tlayer if hasattr(self, '_tlayer') else None).predict(X)
         return self.model_.predict(X)
 
     def score(self, X, y, sample_weight=None):
@@ -233,15 +240,15 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
         """
         pass
 
-    def save(self, filepath):
+    def save(self, path):
         """
         Saves the model weights in a file provided by path
-        :type filepath: path to the file
+        :type path: path to the file
         :return: status
         """
-        model_path = filepath + '_model.json'
-        weights_path = filepath + '_weights.h5'
-        args_path = filepath + '_args.json'
+        model_path = os.path.join(path, 'model.json')
+        args_path = os.path.join(path, 'args.json')
+        weights_path = os.path.join(path, 'weights.h5')
         # Save the weights
         self.model_.save_weights(weights_path)
         # Save the model architecture
@@ -250,15 +257,15 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
         with open(args_path, 'w') as f:
             json.dump({'batch_size': self.batch_size, 'epochs': self.epochs, 'output': self.output}, f)
 
-    def load(self, filepath):
+    def load(self, path):
         """
         Loads model from the filepath
-        :type filepath: path to the file
+        :type path: path to the file
         :return: Saved model
         """
-        model_path = filepath + '_model.json'
-        weights_path = filepath + '_weights.h5'
-        args_path = filepath + '_args.json'
+        model_path = os.path.join(path, 'model.json')
+        weights_path = os.path.join(path, 'weights.h5')
+        args_path = os.path.join(path, 'args.json')
         if not os.path.isfile(model_path):
             raise IOError('Ca\'t find models in \'{}\''.format(model_path))
         if not os.path.isfile(weights_path):
@@ -289,7 +296,13 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
     def __setstate__(self, state):
         pass
 
-    def _features(self):
+    def transfer(self, status, layer=None):
+        self._transfer = status
+        self._tlayer = layer
+
+    def _features(self, layer_name=None):
+        if layer_name is None:
+            layer_name = self.model_.layers[-2].name
         intermediate_layer_model = Model(inputs=self.model_.input,
-                                         outputs=self.model_.get_layer('feature_layer').output)
+                                         outputs=self.model_.get_layer(layer_name).output)
         return intermediate_layer_model
