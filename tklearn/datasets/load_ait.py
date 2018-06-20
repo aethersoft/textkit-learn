@@ -7,7 +7,7 @@ def _file_paths(base_dir, task):
     return {
         'E.c': {
             'train': os.path.join(base_dir, 'E-c-En', 'train', '2018-E-c-En-train.txt'),
-            'dev': os.path.join(base_dir + 'E-c-En', 'dev', '2018-E-c-En-dev.txt'),
+            'dev': os.path.join(base_dir, 'E-c-En', 'dev', '2018-E-c-En-dev.txt'),
             'test': None,
         },
         'EI.oc': {
