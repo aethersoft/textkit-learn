@@ -1,4 +1,5 @@
 import os
+
 import pandas as pd
 
 
@@ -6,22 +7,22 @@ def load_emoint(input_path=''):
     ids = set()
     files = {
         'train': {
-            'anger_train': os.path.join(input_path, 'train\\anger-ratings-0to1.train.txt'),
-            'fear_train': os.path.join(input_path, 'train\\fear-ratings-0to1.train.txt'),
-            'joy_train': os.path.join(input_path, 'train\\joy-ratings-0to1.train.txt'),
-            'sadness_train': os.path.join(input_path, 'train\\sadness-ratings-0to1.train.txt'),
+            'anger_train': os.path.join(input_path, 'train', 'anger-ratings-0to1.train.txt'),
+            'fear_train': os.path.join(input_path, 'train', 'fear-ratings-0to1.train.txt'),
+            'joy_train': os.path.join(input_path, 'train', 'joy-ratings-0to1.train.txt'),
+            'sadness_train': os.path.join(input_path, 'train', 'sadness-ratings-0to1.train.txt'),
         },
         'dev': {
-            'anger_dev': os.path.join(input_path, 'dev.gold\\anger-ratings-0to1.dev.gold.txt'),
-            'fear_dev': os.path.join(input_path, 'dev.gold\\fear-ratings-0to1.dev.gold.txt'),
-            'joy_dev': os.path.join(input_path, 'dev.gold\\joy-ratings-0to1.dev.gold.txt'),
-            'sadness_dev': os.path.join(input_path, 'dev.gold\\sadness-ratings-0to1.dev.gold.txt'),
+            'anger_dev': os.path.join(input_path, 'dev.gold', 'anger-ratings-0to1.dev.gold.txt'),
+            'fear_dev': os.path.join(input_path, 'dev.gold', 'fear-ratings-0to1.dev.gold.txt'),
+            'joy_dev': os.path.join(input_path, 'dev.gold', 'joy-ratings-0to1.dev.gold.txt'),
+            'sadness_dev': os.path.join(input_path, 'dev.gold', 'sadness-ratings-0to1.dev.gold.txt'),
         },
         'test': {
-            'anger_test': os.path.join(input_path, 'test.gold\\anger-ratings-0to1.test.gold.txt'),
-            'fear_test': os.path.join(input_path, 'test.gold\\fear-ratings-0to1.test.gold.txt'),
-            'joy_test': os.path.join(input_path, 'test.gold\\joy-ratings-0to1.test.gold.txt'),
-            'sadness_test': os.path.join(input_path, 'test.gold\\sadness-ratings-0to1.test.gold.txt'),
+            'anger_test': os.path.join(input_path, 'test.gold', 'anger-ratings-0to1.test.gold.txt'),
+            'fear_test': os.path.join(input_path, 'test.gold', 'fear-ratings-0to1.test.gold.txt'),
+            'joy_test': os.path.join(input_path, 'test.gold', 'joy-ratings-0to1.test.gold.txt'),
+            'sadness_test': os.path.join(input_path, 'test.gold', 'sadness-ratings-0to1.test.gold.txt'),
         }
     }
     data = {'train': dict(), 'dev': dict(), 'test': dict()}
