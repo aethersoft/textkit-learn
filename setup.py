@@ -9,4 +9,6 @@ setup(name='tklearn',
       license='MIT',
       packages=find_packages(),
       package_dir={'tklearn': 'tklearn'},
-      zip_safe=False, install_requires=['pandas', 'numpy', 'scipy', 'scikit-learn', 'nltk', 'keras'])
+      zip_safe=False,
+      install_requires=['pandas', 'numpy', 'scipy', 'scikit-learn', 'nltk', 'keras', 'beautifulsoup4', 'texttable',
+                        'gensim'])
