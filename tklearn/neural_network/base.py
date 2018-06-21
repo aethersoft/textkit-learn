@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 from keras import Model
+from keras.callbacks import EarlyStopping
 from keras.models import model_from_json
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 
@@ -38,7 +39,12 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         """
         X, y = self.preprocess(X, y)
         self.model_ = self.build_model(X, y)
-        self.model_.fit(X, y, batch_size=self.batch_size, epochs=self.epochs)
+        callbacks = []
+        if hasattr(self, '_early_stopping'):
+            callbacks += EarlyStopping(**self._early_stopping)
+        if len(callbacks) == 0:
+            callbacks = None
+        self.model_.fit(X, y, batch_size=self.batch_size, epochs=self.epochs, callbacks=callbacks)
         return self
 
     def predict(self, X):
@@ -153,6 +159,19 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         self._transfer = status
         self._tlayer = layer
 
+    def early_stopping(self, status, **flags):
+        if status:
+            self._early_stopping = {
+                'monitor': 'val_loss',
+                'min_delta': 0,
+                'patience': 2,
+                'verbose': 0,
+                'mode': 'auto'
+            }
+            self._early_stopping.update(flags)
+        else:
+            del self.__dict__["_early_stopping"]
+
     def _features(self, layer_name=None):
         if layer_name is None:
             layer_name = self.model_.layers[-2].name
@@ -191,7 +210,12 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
         """
         X, y = self.preprocess(X, y)
         self.model_ = self.build_model(X, y)
-        self.model_.fit(X, y, batch_size=self.batch_size, epochs=self.epochs)
+        callbacks = []
+        if hasattr(self, '_early_stopping'):
+            callbacks += EarlyStopping(**self._early_stopping)
+        if len(callbacks) == 0:
+            callbacks = None
+        self.model_.fit(X, y, batch_size=self.batch_size, epochs=self.epochs, callbacks=callbacks)
         return self
 
     def predict(self, X):
@@ -299,6 +323,19 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
     def transfer(self, status, layer=None):
         self._transfer = status
         self._tlayer = layer
+
+    def early_stopping(self, status, **flags):
+        if status:
+            self._early_stopping = {
+                'monitor': 'val_loss',
+                'min_delta': 0,
+                'patience': 2,
+                'verbose': 0,
+                'mode': 'auto'
+            }
+            self._early_stopping.update(flags)
+        else:
+            del self.__dict__["_early_stopping"]
 
     def _features(self, layer_name=None):
         if layer_name is None:
