@@ -41,7 +41,7 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         self.model_ = self.build_model(X, y)
         callbacks = []
         if hasattr(self, '_early_stopping'):
-            callbacks += EarlyStopping(**self._early_stopping)
+            callbacks.append(EarlyStopping(**self._early_stopping))
         if len(callbacks) == 0:
             callbacks = None
         self.model_.fit(X, y, batch_size=self.batch_size, epochs=self.epochs, callbacks=callbacks)
@@ -212,7 +212,7 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
         self.model_ = self.build_model(X, y)
         callbacks = []
         if hasattr(self, '_early_stopping'):
-            callbacks += EarlyStopping(**self._early_stopping)
+            callbacks.append(EarlyStopping(**self._early_stopping))
         if len(callbacks) == 0:
             callbacks = None
         self.model_.fit(X, y, batch_size=self.batch_size, epochs=self.epochs, callbacks=callbacks)
