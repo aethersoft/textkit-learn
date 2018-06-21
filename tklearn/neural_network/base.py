@@ -42,9 +42,13 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         callbacks = []
         if hasattr(self, '_early_stopping'):
             callbacks.append(EarlyStopping(**self._early_stopping))
+        validation_split = 0.0
+        if hasattr(self, '_validation_split'):
+            validation_split = self._validation_split
         if len(callbacks) == 0:
             callbacks = None
-        self.model_.fit(X, y, batch_size=self.batch_size, epochs=self.epochs, callbacks=callbacks)
+        self.model_.fit(X, y, batch_size=self.batch_size, epochs=self.epochs, callbacks=callbacks,
+                        validation_split=validation_split)
         return self
 
     def predict(self, X):
@@ -166,11 +170,14 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
                 'min_delta': 0,
                 'patience': 2,
                 'verbose': 0,
-                'mode': 'auto'
+                'mode': 'auto',
             }
             self._early_stopping.update(flags)
         else:
             del self.__dict__["_early_stopping"]
+
+    def validation_split(self, split):
+        self._validation_split = split
 
     def _features(self, layer_name=None):
         if layer_name is None:
@@ -213,9 +220,13 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
         callbacks = []
         if hasattr(self, '_early_stopping'):
             callbacks.append(EarlyStopping(**self._early_stopping))
+        validation_split = 0.0
+        if hasattr(self, '_validation_split'):
+            validation_split = self._validation_split
         if len(callbacks) == 0:
             callbacks = None
-        self.model_.fit(X, y, batch_size=self.batch_size, epochs=self.epochs, callbacks=callbacks)
+        self.model_.fit(X, y, batch_size=self.batch_size, epochs=self.epochs, callbacks=callbacks,
+                        validation_split=validation_split)
         return self
 
     def predict(self, X):
@@ -331,11 +342,14 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
                 'min_delta': 0,
                 'patience': 2,
                 'verbose': 0,
-                'mode': 'auto'
+                'mode': 'auto',
             }
             self._early_stopping.update(flags)
         else:
             del self.__dict__["_early_stopping"]
+
+    def validation_split(self, split):
+        self._validation_split = split
 
     def _features(self, layer_name=None):
         if layer_name is None:
