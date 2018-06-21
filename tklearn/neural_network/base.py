@@ -163,21 +163,21 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         self._transfer = status
         self._tlayer = layer
 
-    def early_stopping(self, status, **flags):
-        if status:
+    def early_stopping(self, early_stopping, monitor='val_loss', min_delta=0, patience=2, verbose=0, mode='auto',
+                       **kwargs):
+        if early_stopping:
             self._early_stopping = {
-                'monitor': 'val_loss',
-                'min_delta': 0,
-                'patience': 2,
-                'verbose': 0,
-                'mode': 'auto',
+                'monitor': monitor,
+                'min_delta': min_delta,
+                'patience': patience,
+                'verbose': verbose,
+                'mode': mode,
             }
-            self._early_stopping.update(flags)
         else:
             del self.__dict__["_early_stopping"]
 
-    def validation_split(self, split):
-        self._validation_split = split
+    def validation_split(self, validation_split, **kwargs):
+        self._validation_split = validation_split
 
     def _features(self, layer_name=None):
         if layer_name is None:
@@ -335,21 +335,21 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
         self._transfer = status
         self._tlayer = layer
 
-    def early_stopping(self, status, **flags):
-        if status:
+    def early_stopping(self, early_stopping, monitor='val_loss', min_delta=0, patience=2, verbose=0, mode='auto',
+                       **kwargs):
+        if early_stopping:
             self._early_stopping = {
-                'monitor': 'val_loss',
-                'min_delta': 0,
-                'patience': 2,
-                'verbose': 0,
-                'mode': 'auto',
+                'monitor': monitor,
+                'min_delta': min_delta,
+                'patience': patience,
+                'verbose': verbose,
+                'mode': mode,
             }
-            self._early_stopping.update(flags)
         else:
             del self.__dict__["_early_stopping"]
 
-    def validation_split(self, split):
-        self._validation_split = split
+    def validation_split(self, validation_split, **kwargs):
+        self._validation_split = validation_split
 
     def _features(self, layer_name=None):
         if layer_name is None:
