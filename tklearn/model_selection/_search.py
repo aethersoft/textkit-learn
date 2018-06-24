@@ -2,6 +2,7 @@ import logging
 import time
 
 from hyperopt import hp, tpe, fmin, Trials, STATUS_OK, rand
+from hyperopt.pyll import scope
 
 logger = logging.getLogger(__name__)
 
@@ -13,8 +14,8 @@ __all__ = [
 def _build_space(specs, name=''):
     if specs is None:
         raise TypeError('Invalid search space specification.')
-    val_type = specs['type']
-    val_val = specs['value'] if hasattr(specs, 'value') else None
+    val_type = specs['type'] if 'type' in specs else None
+    val_val = specs['value'] if 'value' in specs else None
     if val_type == 'rlist':
         length = specs['length']
         val = []
@@ -41,9 +42,12 @@ def _build_space(specs, name=''):
         return hp.choice(name, val)
     elif val_type == 'uniform':
         if len(val_val) == 2:
-            return hp.uniform(name, val_val[0], val_val[1])
+            val = hp.uniform(name, val_val[0], val_val[1])
         elif len(val_val) == 3:
-            return hp.quniform(name, val_val[0], val_val[1], val_val[2])
+            val = hp.quniform(name, val_val[0], val_val[1], val_val[2])
+        if isinstance(val_val[0], int) and isinstance(val_val[1], int):
+            val = scope.int(val)
+        return val
     elif val_type == 'var':
         return val_val
     else:
@@ -52,7 +56,7 @@ def _build_space(specs, name=''):
 
 
 class HyperoptOptimizer:
-    def __init__(self, estimator, param_dist, scorer, max_evals=10, search_algorithm='tpe'):
+    def __init__(self, estimator, param_dist, scorer, max_evals=25, search_algorithm='tpe'):
         """
         Initialize Hyperopt Optimizer object.
         :param estimator: Estimator object; A object of that type is instantiated for each evaluation point.
@@ -73,6 +77,7 @@ class HyperoptOptimizer:
         })
 
         def objective(kwargs):
+            logger.info('Training model with parameters: {}'.format(kwargs))
             y_pred = self.estimator(**kwargs).fit(X_train, y_train).predict(X_test)
             loss = -self.scorer(y_test, y_pred)
             return {
@@ -85,4 +90,5 @@ class HyperoptOptimizer:
             algo = rand.suggest
         else:
             algo = tpe.suggest
-        return fmin(objective, space=space, algo=algo, max_evals=self.max_evals, trials=trials)
+        fmin(objective, space=space, algo=algo, max_evals=self.max_evals, trials=trials)
+        return trials
