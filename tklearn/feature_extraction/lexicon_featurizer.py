@@ -306,7 +306,7 @@ class SentiStrengthScorer:
         self.dir_path = dir_path
 
         if 'CLASSPATH' in os.environ:
-            os.environ['CLASSPATH'] += ":" + jar_path
+            os.environ['CLASSPATH'] += os.pathsep + jar_path
         else:
             os.environ['CLASSPATH'] = jar_path
 
