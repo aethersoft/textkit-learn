@@ -36,7 +36,7 @@ class ExtractEmbedding:
             dim = len(list(self.embedding_map.values())[0])
         else:
             dim = 0
-        tokens = self.tokenizer.tokenize([text])
+        tokens = self.tokenizer.tokenize([text])[0]
         sum_vec = np.zeros(shape=(dim,))
         for token in tokens:
             if token in self.embedding_map:
