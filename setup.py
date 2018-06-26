@@ -11,4 +11,4 @@ setup(name='tklearn',
       package_dir={'tklearn': 'tklearn'},
       zip_safe=False,
       install_requires=['pandas', 'numpy', 'scipy', 'scikit-learn', 'nltk', 'keras', 'beautifulsoup4', 'texttable',
-                        'gensim', 'hyperopt'])
+                        'gensim', 'hyperopt', 'jnius'])

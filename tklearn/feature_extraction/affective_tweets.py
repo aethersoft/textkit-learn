@@ -12,6 +12,7 @@ from sklearn.preprocessing import FunctionTransformer
 from tklearn.text.tokens import bigrams
 from tklearn.utils.collections import merge_dicts
 from tklearn.utils.resource import resource_path
+from tklearn.preprocessing import DictionaryTokenizer
 
 __all__ = ['AffectiveTweetsVectorizer']
 
@@ -25,8 +26,9 @@ class ExtractEmbedding:
         self.word_first = word_first
         self.leave_head = leave_head
         self.embedding_map = self.load_embeddings()
+        self.tokenizer = DictionaryTokenizer(self.embedding_map.keys())
 
-    def __call__(self, tokens):
+    def transform(self, text):
         """
         Averaging word embeddings
         """
@@ -34,6 +36,7 @@ class ExtractEmbedding:
             dim = len(list(self.embedding_map.values())[0])
         else:
             dim = 0
+        tokens = self.tokenizer.tokenize([text])
         sum_vec = np.zeros(shape=(dim,))
         for token in tokens:
             if token in self.embedding_map:
@@ -72,12 +75,14 @@ class SentiWordnetScorer:
         self.lexicon_path = lexicon_path
         self.lexicon_map_ = self.load_lexicon()
 
-    def __call__(self, tokens):
+    def transform(self, text):
         """
         This function returns sum of intensities of positive and negative tokens
         :param text: text to featurize
         :param tokenizer: tokenizer to tokenize text
         """
+        _word_pattern = re.compile('\w+', flags=re.UNICODE)
+        tokens = _word_pattern.findall(text)
         positive_score, negative_score = 0.0, 0.0
         for token in tokens:
             token = token.lower()
@@ -116,12 +121,14 @@ class PolarityCounter:
         self.lexicon_paths = list(lexicon_paths)
         self.lexicon_map = self.load_lexicons()
 
-    def __call__(self, tokens):
+    def transform(self, text):
         """
         This function returns count of positive and negative tokens
         :param tokens: tokens to featurize
         :param tokenizer: tokenizer to tokenize text
         """
+        _word_pattern = re.compile('\w+', flags=re.UNICODE)
+        tokens = _word_pattern.findall(text)
         positive_count, negative_count = 0.0, 0.0
         for token in tokens:
             if token in self.lexicon_map:
@@ -165,7 +172,9 @@ class PolarityScorer:
                 lexicon_maps.append(lexicon_map)
         self.lexicon_map_ = merge_dicts(*lexicon_maps)
 
-    def __call__(self, tokens, bigram=True):
+    def transform(self, text, bigram=True):
+        _word_pattern = re.compile('#?\w+', flags=re.UNICODE)
+        tokens = _word_pattern.findall(text)
         unigrams = tokens
         if bigram:
             bt = bigrams(tokens)
@@ -207,7 +216,9 @@ class SentimentRanking:
         self.fid = fid
         self.features = [self.fid + '_' + x for x in ['Negative', 'Neutral', 'Positive']]
 
-    def __call__(self, tokens):
+    def transform(self, text):
+        _word_pattern = re.compile('\w+', flags=re.UNICODE)
+        tokens = _word_pattern.findall(text)
         sum_vec = [0.0] * len(self.features)
         for token in tokens:
             if token in self.emoji_map:
@@ -224,8 +235,10 @@ class NegationCounter:
         self.lexicon_path = lexicon_path
         self.lexicon_map = self.load_lexicon()
 
-    def __call__(self, tokens):
+    def transform(self, text):
         count = 0
+        _word_pattern = re.compile('\w+', flags=re.UNICODE)
+        tokens = _word_pattern.findall(text)
         for token in tokens:
             if token in self.lexicon_map:
                 count += 1
@@ -253,11 +266,13 @@ class EmotionLexiconScorer:
                          'negative', 'positive', 'sadness', 'surprise', 'trust']
         self.lexicon_map = self.load_lexicon()
 
-    def __call__(self, tokens):
+    def transform(self, text):
         """This function returns score of tokens belonging to different emotions
         :param text: text to featurize
         :param tokenizer: tokenizer to tokenize text
         """
+        _word_pattern = re.compile('\w+', flags=re.UNICODE)
+        tokens = _word_pattern.findall(text)
         sum_vec = [0.0] * len(self.emotions)
         for token in tokens:
             if token in self.lexicon_map:
@@ -322,13 +337,15 @@ class SentiStrengthScorer:
         except ImportError:
             pass
 
-    def __call__(self, tokens):
+    def transform(self, text):
         """This function returns sum of intensities of positive and negative tokens
         :param text text to featurize
         :param tokenizer tokenizer to tokenize text
         """
         if not self.load_success:
             return [0.0, 0.0]
+        _word_pattern = re.compile('\w+', flags=re.UNICODE)
+        tokens = _word_pattern.findall(text)
         data = '+'.join(tokens).encode('utf-8').decode("utf-8", "ignore")
         score = self.senti_obj.computeSentimentScores(data)
         splits = score.rstrip().split(' ')
@@ -426,14 +443,15 @@ class LIWCExtractor:
                          '>six_letter_words', 'numerals'] + list(self.categories) + [x[0] for x in self.punctuations()]
         self.features.sort()
 
-    def __call__(self, tokens):
+    def transform(self, text):
         """
         This function returns count of positive and negative tokens
         :param tokens: tokens to featurize
         """
         liwc = {}
 
-        text = ' '.join(tokens)
+        _word_pattern = re.compile('\w+', flags=re.UNICODE)
+        tokens = _word_pattern.findall(text)
         num_capital_words = len(re.findall(r"[A-Z]['A-Z]*", text))
         words = re.findall(r"[a-z]['a-z]*", text.lower())
 
@@ -509,47 +527,6 @@ class LIWCExtractor:
 
 # --------------------------------------------------------
 
-def _get_lexicon(name):
-    resources = json.load(open(resource_path('resources.json')))
-    lexicons = ['lexicons'] + resources['lexicons'][name]
-    path = resource_path(*lexicons)
-    return path
-
-
-def _get_featurizer(name):
-    """
-    Gets resources from resource path.
-     Resource path should contain json file indicating the resources and how to access them.
-    :param name: name of the lexicon resource
-    :return: path to lexicon
-    """
-    resources = json.load(open(resource_path('resources.json')))
-    featurizer = resources['featurizers'][name]['class']
-    lexicons = resources['featurizers'][name]['lexicons']
-    lexicons = [_get_lexicon(l) for l in lexicons]
-    if featurizer == 'PolarityCounter':
-        return PolarityCounter(*lexicons)
-    elif featurizer == 'SentiWordnetScorer':
-        return SentiWordnetScorer(*lexicons)
-    elif featurizer == 'PolarityScorer':
-        return PolarityScorer(*lexicons)
-    elif featurizer == 'SentimentRanking':
-        fid = resources['featurizers'][name]['id']
-        return SentimentRanking(fid, *lexicons)
-    elif featurizer == 'LIWCExtractor':
-        return LIWCExtractor(*lexicons)
-    elif featurizer == 'ExtractEmbedding':
-        return ExtractEmbedding(*lexicons)
-    elif featurizer == 'NegationCounter':
-        return NegationCounter(*lexicons)
-    elif featurizer == 'EmotionLexiconScorer':
-        return EmotionLexiconScorer(*lexicons)
-    elif featurizer == 'SentiStrengthScorer':
-        return SentiStrengthScorer(*lexicons)
-    else:
-        raise ModuleNotFoundError('No module named {}'.format(featurizer))
-
-
 class AffectiveTweetsVectorizer(FunctionTransformer):
     """
     Convert a collection of raw documents to a vector of features
@@ -576,7 +553,78 @@ class AffectiveTweetsVectorizer(FunctionTransformer):
             self.filters = [self.filters]
 
     def _get_features(self, seq):
-        features = []
+        features_lst = []
         for f in self.filters:
-            features += []
-        return np.concatenate(features, axis=1)
+            features = self._extract_features(seq, f)
+            if features_lst is not None:
+                features_lst += [features]
+        return np.concatenate(features_lst, axis=1)
+
+    def _extract_features(self, seq, feature):
+        outs = []
+        extract_features = AffectiveTweetsVectorizer._get_featurizer(feature)
+        if extract_features is None:
+            return None
+        for text in seq:
+            if self.caching and text in AffectiveTweetsVectorizer.__mem_cache[feature]:
+                temp = AffectiveTweetsVectorizer.__mem_cache[feature][text]
+            else:
+                temp = extract_features.transform(text)
+            outs.append(np.array(temp))
+            if self.caching and text not in AffectiveTweetsVectorizer.__mem_cache[feature]:
+                AffectiveTweetsVectorizer.__mem_cache[feature][text] = temp
+        outs = np.array(outs)
+        if len(outs.shape) == 1:
+            outs = np.reshape(outs, (-1, 1))
+        return outs
+
+    @staticmethod
+    def has_filter(filter):
+        resources = json.load(open(resource_path('resources.json')))
+        featurizers = resources['featurizers']
+        return filter in featurizers
+
+    @staticmethod
+    def _get_featurizer(name):
+        """
+        Gets resources from resource path.
+         Resource path should contain json file indicating the resources and how to access them.
+        :param name: name of the lexicon resource
+        :return: path to lexicon
+        """
+        resources = json.load(open(resource_path('resources.json')))
+        featurizers = resources['featurizers']
+        if name in featurizers:
+            featurizer = featurizers[name]['class']
+            lexicons = featurizers[name]['lexicons']
+            lexicons = [AffectiveTweetsVectorizer._get_lexicon(l) for l in lexicons]
+            if featurizer == 'PolarityCounter':
+                return PolarityCounter(*lexicons)
+            elif featurizer == 'SentiWordnetScorer':
+                return SentiWordnetScorer(*lexicons)
+            elif featurizer == 'PolarityScorer':
+                return PolarityScorer(*lexicons)
+            elif featurizer == 'SentimentRanking':
+                fid = resources['featurizers'][name]['id']
+                return SentimentRanking(fid, *lexicons)
+            elif featurizer == 'LIWCExtractor':
+                return LIWCExtractor(*lexicons)
+            elif featurizer == 'ExtractEmbedding':
+                return ExtractEmbedding(*lexicons)
+            elif featurizer == 'NegationCounter':
+                return NegationCounter(*lexicons)
+            elif featurizer == 'EmotionLexiconScorer':
+                return EmotionLexiconScorer(*lexicons)
+            elif featurizer == 'SentiStrengthScorer':
+                return SentiStrengthScorer(*lexicons)
+            else:
+                raise ModuleNotFoundError('No module named {}'.format(featurizer))
+        else:
+            return None
+
+    @staticmethod
+    def _get_lexicon(name):
+        resources = json.load(open(resource_path('resources.json')))
+        lexicons = ['lexicons'] + resources['lexicons'][name]
+        path = resource_path(*lexicons)
+        return path
