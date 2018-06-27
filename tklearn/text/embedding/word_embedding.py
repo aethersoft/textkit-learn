@@ -14,6 +14,7 @@ class WordEmbedding:
     def __init__(self, word_embedding, vector_size):
         self.word_embedding = word_embedding
         self._vector_size = vector_size
+        self.secondary_word_embeddings = []
 
     @property
     def vector_size(self):
@@ -23,7 +24,22 @@ class WordEmbedding:
     def vocabulary(self):
         if isinstance(self.word_embedding, pd.DataFrame):
             raise NotImplementedError
-        return self.word_embedding.vocab
+        vocab = self.word_embedding.vocab.keys()
+        for e in self.secondary_word_embeddings:
+            vocab.update(e.vocabulary)
+        return vocab
+
+    def append(self, e):
+        """
+        Appends another word embedding of same size (required if there is an extension to another word embedding)
+        :param e:
+        :return:
+        """
+        if self.vector_size != e.vector_size:
+            raise ValueError(
+                'Invalid embedding dim, expected {} found {}.'.format(self.vector_size, e.vector_size))
+        self.secondary_word_embeddings.append(e)
+        raise NotImplementedError
 
     def __getitem__(self, item):
         try:
@@ -31,7 +47,12 @@ class WordEmbedding:
                 return np.array(self.word_embedding.loc[item].as_matrix())
             return self.word_embedding[item]
         except KeyError:
-            return None
+            output = None
+            for e in self.secondary_word_embeddings:
+                output = e[item]
+                if output is not None:
+                    break
+            return output
 
     def __deepcopy__(self, memodict={}):
         obj = WordEmbedding(self.word_embedding, self.vector_size)
