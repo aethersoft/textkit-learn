@@ -3,7 +3,7 @@ from sklearn.base import is_classifier
 from sklearn.model_selection import check_cv
 from sklearn.utils import indexable
 
-from tklearn.utils.collections import invert_array, apply, concatenate_array
+from tklearn.utils.collections import invert, apply, concatenate
 
 __all__ = ['multitask_cross_val_predict']
 
@@ -85,7 +85,7 @@ def multitask_cross_val_predict(estimator, X, y, groups=None, cv=2):
                 for i, (block_y_task_i, block_y_index_task_i) in enumerate(zip(block_y, block_y_index)):
                     predictions[i] += [block_y_task_i]
                     prediction_idx[i] += [block_y_index_task_i]
-    prediction_idx = apply(invert_array, apply(concatenate_array, prediction_idx))
-    predictions = apply(concatenate_array, predictions)
+    prediction_idx = apply(invert, apply(concatenate, prediction_idx))
+    predictions = apply(concatenate, predictions)
     out = [p[idx] for p, idx in zip(predictions, prediction_idx)]
     return out
