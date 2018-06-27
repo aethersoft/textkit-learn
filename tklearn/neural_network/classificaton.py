@@ -7,6 +7,7 @@ from keras.layers import Embedding, Conv1D, GlobalMaxPooling1D, GlobalAveragePoo
 from keras.utils import to_categorical
 from scipy.sparse import isspmatrix
 
+from tklearn.utils.collections import isiterable
 from .base import KerasClassifier
 
 
@@ -42,7 +43,7 @@ class FNNClassifier(KerasClassifier):
 
         for dim in self.hidden_dims:
             # Hidden layer:
-            if isinstance(dim, tuple) or isinstance(dim, list):
+            if isiterable(dim):
                 assert len(dim) == 2, 'Invalid parameter input valued \'{}\' for hidden dimensions. ' \
                                       'This parameter can be an integer or a tuple of dimension 2.'.format(dim)
                 model.add(Dense(dim[0], activation='relu'))
@@ -87,7 +88,7 @@ class CNNClassifier(KerasClassifier):
             self.hidden_dims = []
         else:
             self.hidden_dims = list(self.hidden_dims)
-        if not isinstance(self.kernel_size, list):
+        if not isiterable(self.kernel_size):
             self.kernel_size = [self.kernel_size]
 
     def preprocess(self, X, y=None):
@@ -204,7 +205,7 @@ class LSTMClassifier(KerasClassifier):
         # MLPs
         for dim in self.hidden_dims:
             # Hidden layer:
-            if isinstance(dim, tuple) or isinstance(dim, list):
+            if isiterable(dim):
                 assert len(dim) == 2, 'Invalid parameter input valued \'{}\' for hidden dimensions. ' \
                                       'This parameter can be an integer or a tuple of dimension 2.'.format(dim)
                 model.add(Dense(dim[0], activation='relu'))
@@ -252,7 +253,7 @@ class CNNLSTMClassifier(KerasClassifier):
             self.hidden_dims = []
         else:
             self.hidden_dims = list(self.hidden_dims)
-        if not isinstance(self.kernel_size, list):
+        if not isiterable(self.kernel_size):
             self.kernel_size = [self.kernel_size]
 
     def preprocess(self, X, y=None):
@@ -351,7 +352,7 @@ class LSTMCNNClassifier(KerasClassifier):
             self.hidden_dims = []
         else:
             self.hidden_dims = list(self.hidden_dims)
-        if not isinstance(self.kernel_size, list):
+        if not isiterable(self.kernel_size):
             self.kernel_size = [self.kernel_size]
 
     def preprocess(self, X, y=None):
