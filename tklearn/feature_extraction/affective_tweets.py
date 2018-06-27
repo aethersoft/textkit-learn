@@ -10,7 +10,7 @@ import numpy as np
 from sklearn.preprocessing import FunctionTransformer
 
 from tklearn.text.tokens import bigrams
-from tklearn.utils.collections import merge_dicts
+from tklearn.utils.collections import dmerge
 from tklearn.utils.resource import resource_path
 from tklearn.preprocessing import DictionaryTokenizer
 
@@ -152,7 +152,7 @@ class PolarityCounter:
                     splits = l.split('\t')
                     lm[splits[0]] = splits[1]
                 temp.append(lm)
-        return merge_dicts(*temp)
+        return dmerge(*temp)
 
 
 class PolarityScorer:
@@ -170,7 +170,7 @@ class PolarityScorer:
                     splits = l.split('\t')
                     lexicon_map[splits[0]] = float(splits[1])
                 lexicon_maps.append(lexicon_map)
-        self.lexicon_map_ = merge_dicts(*lexicon_maps)
+        self.lexicon_map_ = dmerge(*lexicon_maps)
 
     def transform(self, text, bigram=True):
         _word_pattern = re.compile('#?\w+', flags=re.UNICODE)
