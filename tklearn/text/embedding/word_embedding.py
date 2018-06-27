@@ -1,8 +1,11 @@
 import csv
+import gzip
+import re
 
 import gensim
 import numpy as np
 import pandas as pd
+import six
 
 __all__ = [
     'load_word2vec',
@@ -24,7 +27,9 @@ class WordEmbedding:
     def vocabulary(self):
         if isinstance(self.word_embedding, pd.DataFrame):
             raise NotImplementedError
-        vocab = self.word_embedding.vocab.keys()
+        if isinstance(self.word_embedding, dict):
+            return set(self.word_embedding.keys())
+        vocab = set(self.word_embedding.vocab.keys())
         for e in self.secondary_word_embeddings:
             vocab.update(e.vocabulary)
         return vocab
@@ -39,7 +44,6 @@ class WordEmbedding:
             raise ValueError(
                 'Invalid embedding dim, expected {} found {}.'.format(self.vector_size, e.vector_size))
         self.secondary_word_embeddings.append(e)
-        raise NotImplementedError
 
     def __getitem__(self, item):
         try:
@@ -88,3 +92,23 @@ def load_glove(data_file):
     """
     temp = pd.read_table(data_file, sep=' ', index_col=0, header=None, quoting=csv.QUOTE_NONE)
     return WordEmbedding(temp, temp.shape[1])
+
+
+def load_embedding(data_file, word_first=False, leave_head=False):
+    """
+    Creates a map from words to word embeddings (in text format)
+    :return: embedding map
+    """
+    with gzip.open(data_file, 'rb') as f:
+        lines = f.read().decode('utf8').splitlines()
+    if leave_head:
+        lines = lines[1:]
+    lexicon_map = {}
+    for l in lines:
+        splits = re.split('[\t ]', l)
+        if word_first:
+            lexicon_map[splits[0]] = np.asarray(splits[1:], dtype='float32')
+        else:
+            lexicon_map[splits[-1]] = np.asarray(splits[:-1], dtype='float32')
+    dim = len(six.next(six.itervalues(lexicon_map)))
+    return WordEmbedding(lexicon_map, dim)
