@@ -579,41 +579,56 @@ class LexiconVectorizer(FunctionTransformer):
 
     @staticmethod
     def has_filter(filter):
-        featurizers = ['MPQA', 'BingLiu', 'AFINN', 'Sentiment140', 'NRCHS', 'NRCWEA', 'NRCHEA', 'SentiWordNet',
-                       'Negations']
+        featurizers = ['MPQA', 'BingLiu', 'AFINN', 'Emoticon', 'Sentiment140', 'NRCHS', 'NRCWEA', 'NRCHEA', 'NRCAI', 'NRC10E',
+                       'SentiWordNet', 'Negations', 'SentiStrength', 'LIWC']
         return filter in featurizers
 
     @staticmethod
     def _get_filter(filter):
         if filter == 'MPQA':
-            path = resource_path('lexicons', filter, 'mpqa.txt.gz')
+            path = resource_path('lexicons', 'MPQA', 'mpqa.txt.gz')
             return PolarityCounter(path)
         elif filter == 'BingLiu':
-            path = resource_path('lexicons', filter, 'BingLiu.txt.gz')
+            path = resource_path('lexicons', 'BingLiu', 'BingLiu.txt.gz')
             return PolarityCounter(path)
         elif filter == 'AFINN':
-            path = resource_path('lexicons', filter, 'AFINN-en-165.txt.gz')
-            path2 = resource_path('lexicons', filter, 'AFINN-emoticon-8.txt.gz')
-            return PolarityScorer(path, path2)
+            path = resource_path('lexicons', 'AFINN', 'AFINN-en-165.txt.gz')
+            return PolarityScorer(path)
+        elif filter == 'Emoticon':
+            path = resource_path('lexicons', 'Emoticon', 'AFINN-emoticon-8.txt.gz')
+            return PolarityScorer(path)
         elif filter == 'Sentiment140':
-            path = resource_path('lexicons', filter, 'Sentiment140-Lexicon-v0.1', 'unigrams-pmilexicon.txt.gz')
-            path2 = resource_path('lexicons', filter, 'Sentiment140-Lexicon-v0.1', 'bigrams-pmilexicon.txt.gz')
+            path = resource_path('lexicons', 'Sentiment140', 'unigrams-pmilexicon.txt.gz')
+            path2 = resource_path('lexicons', 'Sentiment140', 'bigrams-pmilexicon.txt.gz')
             return PolarityScorer(path, path2)
         elif filter == 'NRCHS':
-            path = resource_path('lexicons', filter, 'NRC-Hashtag-Sentiment-Lexicon-v0.1', 'unigrams-pmilexicon.txt.gz')
-            path2 = resource_path('lexicons', filter, 'NRC-Hashtag-Sentiment-Lexicon-v0.1', 'bigrams-pmilexicon.txt.gz')
+            path = resource_path('lexicons', 'NRCHS', 'unigrams-pmilexicon.txt.gz')
+            path2 = resource_path('lexicons', 'NRCHS', 'bigrams-pmilexicon.txt.gz')
             return PolarityScorer(path, path2)
         elif filter == 'NRCWEA':
-            path = resource_path('lexicons', filter, 'NRC-emotion-lexicon-wordlevel-v0.92.txt.gz')
+            path = resource_path('lexicons', 'NRCWEA', 'NRC-emotion-lexicon-wordlevel-v0.92.txt.gz')
             return EmotionLexiconScorer(path)
         elif filter == 'NRCHEA':
-            path = resource_path('lexicons', filter, 'NRC-Hashtag-Emotion-Lexicon-v0.2.txt.gz')
+            path = resource_path('lexicons', 'NRCHEA', 'NRC-Hashtag-Emotion-Lexicon-v0.2.txt.gz')
+            return EmotionLexiconScorer(path)
+        elif filter == 'NRCAI':
+            path = resource_path('lexicons', 'NRCAI', 'nrc_affect_intensity.txt.gz')
+            return EmotionLexiconScorer(path)
+        elif filter == 'NRC10E':
+            path = resource_path('lexicons', 'NRC10E', 'w2v-dp-BCC-Lex.txt.gz')
             return EmotionLexiconScorer(path)
         elif filter == 'SentiWordNet':
-            path = resource_path('lexicons', filter, 'SentiWordNet_3.0.0.txt.gzz')
+            path = resource_path('lexicons', 'SentiWordNet', 'SentiWordNet_3.0.0.txt.gzz')
             return SentiWordnetScorer(path)
         elif filter == 'Negations':
-            path = resource_path('lexicons', filter, 'NegatingWordList.txt.gz')
+            path = resource_path('lexicons', 'Negations', 'NegatingWordList.txt.gz')
             return NegationCounter(path)
+        elif filter == 'SentiStrength':
+            path = resource_path('lexicons', 'SentiStrength', 'SentiStrength.jar')
+            path2 = resource_path('lexicons', 'SentiStrength', 'SentiStrength', '')
+            return SentiStrengthScorer(path, path2)
+        elif filter == 'LIWC':
+            path = resource_path('lexicons', 'LIWC', 'LIWC2007.dic')
+            return LIWCExtractor(path)
         else:
             return None
