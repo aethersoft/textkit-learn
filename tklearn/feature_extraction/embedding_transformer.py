@@ -4,7 +4,7 @@ import numpy as np
 from keras.preprocessing import sequence
 from sklearn.base import BaseEstimator, TransformerMixin
 
-__all__ = ['EmbeddingVectorizer']
+__all__ = ['EmbeddingTransformer']
 
 
 class RandomWordVec:
@@ -63,7 +63,7 @@ class ZeroWordVec:
         return [0 for _ in range(self.dim)]
 
 
-class EmbeddingVectorizer(BaseEstimator, TransformerMixin):
+class EmbeddingTransformer(BaseEstimator, TransformerMixin):
     def __init__(self, word_vectors, vocab=None, word_features=None, vocab_size=None, pad_sequences=False,
                  default=None, output='matrix'):
         """
