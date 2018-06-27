@@ -2,18 +2,16 @@ import numpy as np
 import scipy.sparse as sp
 
 
-def contains_iterable(task):
+def isiterable(task):
     """
     Checks whether task has iterable elements
     :param task: task to watch
     :return: whether task has iterable objects as its elements
     """
-    if len(task) == 0:
-        return False
     return hasattr(task[0], '__iter__') and not isinstance(task[0], str)
 
 
-def concatenate_array(arr) -> np.array:
+def concatenate(arr) -> np.array:
     """
     Concatenates given arrays
     :param arr: arrays to concatenate
@@ -28,7 +26,7 @@ def concatenate_array(arr) -> np.array:
     return arr
 
 
-def invert_array(arr):
+def invert(arr):
     """
     Inverts an array and returns the new inverted array
     :param arr: an array to invert
@@ -72,7 +70,7 @@ def collect(func, ipt, out, *args, **kwargs):
     return out
 
 
-def merge_dicts(*dicts):
+def dmerge(*dicts):
     """
     Given number of dicts, merge them into a new dict as a shallow copy.
     :param dicts: dicts to merge
@@ -86,5 +84,5 @@ def merge_dicts(*dicts):
     return z
 
 
-def parallel_sort(*args):
+def psort(*args):
     return [list(t) for t in zip(*sorted(zip(*args), key=lambda x: x[0]))]
