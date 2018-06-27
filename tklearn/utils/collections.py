@@ -2,13 +2,13 @@ import numpy as np
 import scipy.sparse as sp
 
 
-def isiterable(task):
+def isiterable(val):
     """
     Checks whether task has iterable elements
-    :param task: task to watch
+    :param val: task to watch
     :return: whether task has iterable objects as its elements
     """
-    return hasattr(task[0], '__iter__') and not isinstance(task[0], str)
+    return hasattr(val, '__iter__') and not isinstance(val, str)
 
 
 def concatenate(arr) -> np.array:
