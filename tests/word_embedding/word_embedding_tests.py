@@ -1,6 +1,6 @@
 import unittest
 
-from tklearn.text.embedding import load_word2vec, load_embedding
+from tklearn.text.embedding import load_embedding, load_word2vec
 
 
 class WordEmbeddingTestCase(unittest.TestCase):
@@ -25,6 +25,11 @@ class WordEmbeddingTestCase(unittest.TestCase):
         word2vec_google.append(word2vec_edinburgh)
         print('Asserting: {}+{}=={}'.format(vocab_len1, vocab_len2, word2vec_google))
         assert vocab_len1 + vocab_len2 == len(word2vec_google.vocabulary)
+
+    def test_load_fasttext(self):
+        embedding_path = 'D:\Documents\Resources\Models\\textkit-resources\embeddings\FastText\wiki-news-300d-1M.vec.gz'
+        wiki_fasttext = load_embedding(embedding_path, word_first=True, leave_head=True)
+        assert wiki_fasttext['i'] is not None
 
 
 if __name__ == '__main__':
