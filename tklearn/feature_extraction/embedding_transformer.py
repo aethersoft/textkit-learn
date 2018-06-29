@@ -155,14 +155,14 @@ class EmbeddingTransformer(BaseEstimator, TransformerMixin):
             dim = self.embedding_matrix_.shape[1]
             result = []
             for x in X:
-                avg = np.average([self.embedding_matrix_[e] for e in x], axis=0) if len(x) > 0 else np.zeros(dim)
+                avg = np.average([self.embedding_matrix_[self.word_index_[e]] for e in x], axis=0) if len(x) > 0 else np.zeros(dim)
                 result.append(avg)
             return np.array(result)
         else:
             dim = self.embedding_matrix_.shape[1]
             result = []
             for x in X:
-                avg = np.sum([self.embedding_matrix_[e] for e in x], axis=0) if len(x) > 0 else np.zeros(dim)
+                avg = np.sum([self.embedding_matrix_[self.word_index_[e]] for e in x], axis=0) if len(x) > 0 else np.zeros(dim)
                 result.append(avg)
             return np.array(result)
 
