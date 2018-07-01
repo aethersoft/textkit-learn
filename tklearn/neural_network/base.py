@@ -8,9 +8,10 @@ from keras.callbacks import EarlyStopping
 from keras.models import model_from_json
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 
-
 # ======================================================================================================================
 # Classifier -----------------------------------------------------------------------------------------------------------
+from tklearn.utils.keras import ValidationLogger
+
 
 class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
     """
@@ -43,10 +44,12 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         if hasattr(self, '_early_stopping'):
             callbacks.append(EarlyStopping(**self._early_stopping))
         validation_split = 0.0
-        if hasattr(self, '_validation_split'):
-            validation_split = self._validation_split
+        if hasattr(self, '_validation_data') and hasattr(self, '_validation_scorer'):
+            callbacks.append(ValidationLogger(self._validation_data, self._validation_scorer))
         if len(callbacks) == 0:
             callbacks = None
+        if hasattr(self, '_validation_split'):
+            validation_split = self._validation_split
         self.model_.fit(X, y, batch_size=self.batch_size, epochs=self.epochs, callbacks=callbacks,
                         validation_split=validation_split)
         return self
@@ -179,6 +182,10 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
     def validation_split(self, validation_split, **kwargs):
         self._validation_split = validation_split
 
+    def validation_logger(self, validation_data, validation_scorer, **kwargs):
+        self._validation_data = validation_data
+        self._validation_scorer = validation_scorer
+
     def _features(self, layer_name=None):
         if layer_name is None:
             layer_name = self.model_.layers[-2].name
@@ -223,6 +230,8 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
         validation_split = 0.0
         if hasattr(self, '_validation_split'):
             validation_split = self._validation_split
+        if hasattr(self, '_validation_data') and hasattr(self, '_validation_scorer'):
+            callbacks.append(ValidationLogger(self._validation_data, self._validation_scorer))
         if len(callbacks) == 0:
             callbacks = None
         self.model_.fit(X, y, batch_size=self.batch_size, epochs=self.epochs, callbacks=callbacks,
@@ -350,6 +359,10 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
 
     def validation_split(self, validation_split, **kwargs):
         self._validation_split = validation_split
+
+    def validation_logger(self, validation_data, validation_scorer, **kwargs):
+        self._validation_data = validation_data
+        self._validation_scorer = validation_scorer
 
     def _features(self, layer_name=None):
         if layer_name is None:
