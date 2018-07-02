@@ -12,7 +12,7 @@ class ValidationLogger(Callback):
         if logs is None:
             logs = {}
         x, y = self.validation_data
-        if self.scorer == 'micro_f1':
+        if self.scorer == 'f1.micro':
             scorer = lambda y_true, y_pred: f1_score(y_true, y_pred, average='macro')
         else:
             scorer = lambda y_true, y_pred: accuracy_score(y_true, y_pred)
