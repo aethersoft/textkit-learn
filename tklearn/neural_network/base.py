@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 from keras import Model
-from keras.callbacks import EarlyStopping
+from keras.callbacks import EarlyStopping, TensorBoard
 from keras.models import model_from_json
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 
@@ -46,6 +46,12 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         validation_split = 0.0
         if hasattr(self, '_validation_data') and hasattr(self, '_validation_scorer'):
             callbacks.append(ValidationLogger(self._validation_data, self._validation_scorer))
+        if not hasattr(self, '_log_dir'):
+            self.log_dir('./out/logs')
+        tb = TensorBoard(log_dir=self._log_dir, histogram_freq=0, batch_size=32, write_graph=True,
+                         write_grads=False, write_images=False, embeddings_freq=0, embeddings_layer_names=None,
+                         embeddings_metadata=None)
+        callbacks.append(tb)
         if len(callbacks) == 0:
             callbacks = None
         if hasattr(self, '_validation_split'):
@@ -192,6 +198,9 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         intermediate_layer_model = Model(inputs=self.model_.input,
                                          outputs=self.model_.get_layer(layer_name).output)
         return intermediate_layer_model
+
+    def log_dir(self, value='./out/logs'):
+        self._log_dir = value
 
 
 # ======================================================================================================================
