@@ -56,7 +56,7 @@ def _build_space(specs, name=''):
 
 
 class HyperoptOptimizer:
-    def __init__(self, estimator, param_dist, scorer, max_evals=25, search_algorithm='tpe'):
+    def __init__(self, estimator, param_dist, scorer, max_evals=25, search_algorithm='tpe', callbacks=None):
         """
         Initialize Hyperopt Optimizer object.
         :param estimator: Estimator object; A object of that type is instantiated for each evaluation point.
@@ -68,6 +68,9 @@ class HyperoptOptimizer:
         self.scorer = scorer
         self.max_evals = max_evals
         self.search_algorithm = search_algorithm
+        self.callbacks = callbacks
+        if callbacks is None:
+            self.callbacks = []
 
     def optimize(self, X_train, X_test, y_train, y_test):
         trials = Trials()
@@ -80,6 +83,8 @@ class HyperoptOptimizer:
             logger.info('Training model with parameters: {}'.format(kwargs))
             y_pred = self.estimator(**kwargs).fit(X_train, y_train).predict(X_test)
             loss = -self.scorer(y_test, y_pred)
+            for func in self.callbacks:
+                func({'params': kwargs, 'loss': loss, 'y_test': y_test, 'y_pred': y_pred})
             return {
                 'loss': loss,
                 'status': STATUS_OK,
