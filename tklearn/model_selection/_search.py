@@ -84,7 +84,7 @@ class HyperoptOptimizer:
             y_pred = self.estimator(**kwargs).fit(X_train, y_train).predict(X_test)
             loss = -self.scorer(y_test, y_pred)
             for func in self.callbacks:
-                func({'params': kwargs, 'loss': loss, 'y_test': y_test, 'y_pred': y_pred})
+                func({'params': kwargs, 'loss': loss, 'X_test': X_test, 'y_test': y_test, 'y_pred': y_pred})
             return {
                 'loss': loss,
                 'status': STATUS_OK,
