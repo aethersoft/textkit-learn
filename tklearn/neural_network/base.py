@@ -42,7 +42,6 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         callbacks = []
         if hasattr(self, '_early_stopping'):
             callbacks.append(EarlyStopping(**self._early_stopping))
-        validation_split = 0.0
         if hasattr(self, '_validation_data') and hasattr(self, '_validation_scorer'):
             callbacks.append(ValidationLogger(self._validation_data, self._validation_scorer))
         if not hasattr(self, '_log_dir'):
@@ -53,6 +52,7 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         callbacks.append(tb)
         if len(callbacks) == 0:
             callbacks = None
+        validation_split = 0.0
         if hasattr(self, '_validation_split'):
             validation_split = self._validation_split
         self.model_.fit(X, y, batch_size=self.batch_size, epochs=self.epochs, callbacks=callbacks,
@@ -116,6 +116,54 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         """
         pass
 
+    @abstractmethod
+    def preprocess(self, X, y=None):
+        """
+        Preprocess the data and return the preprocessed input for the model
+
+        :return: model input
+        """
+        return X, y
+
+    def transfer(self, status, layer=None):
+        self._transfer = status
+        self._tlayer = layer
+
+    def early_stopping(self, early_stopping, monitor='val_loss', min_delta=0, patience=2, verbose=0, mode='auto',
+                       **kwargs):
+        if early_stopping:
+            self._early_stopping = {
+                'monitor': monitor,
+                'min_delta': min_delta,
+                'patience': patience,
+                'verbose': verbose,
+                'mode': mode,
+            }
+        else:
+            del self.__dict__["_early_stopping"]
+
+    def validation_split(self, validation_split, **kwargs):
+        self._validation_split = validation_split
+
+    def validation_logger(self, validation_data, validation_scorer, **kwargs):
+        self._validation_data = validation_data
+        self._validation_scorer = validation_scorer
+
+    def _features(self, layer_name=None, layer_index=-2):
+        if layer_name is None:
+            layer_name = self.model_.layers[layer_index].name
+        intermediate_layer_model = Model(inputs=self.model_.input, outputs=self.model_.get_layer(layer_name).output)
+        return intermediate_layer_model
+
+    def log_dir(self, value='./out/logs'):
+        self._log_dir = value
+
+    def __getstate__(self):
+        return {}
+
+    def __setstate__(self, state):
+        pass
+
     def save(self, path):
         """
         Saves the model weights in a file provided by path
@@ -155,54 +203,6 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
             kwargs = json.load(f)
             self.batch_size = kwargs['batch_size']
             self.epochs = kwargs['epochs']
-
-    @abstractmethod
-    def preprocess(self, X, y=None):
-        """
-        Preprocess the data and return the preprocessed input for the model
-
-        :return: model input
-        """
-        return X, y
-
-    def __getstate__(self):
-        return {}
-
-    def __setstate__(self, state):
-        pass
-
-    def transfer(self, status, layer=None):
-        self._transfer = status
-        self._tlayer = layer
-
-    def early_stopping(self, early_stopping, monitor='val_loss', min_delta=0, patience=2, verbose=0, mode='auto',
-                       **kwargs):
-        if early_stopping:
-            self._early_stopping = {
-                'monitor': monitor,
-                'min_delta': min_delta,
-                'patience': patience,
-                'verbose': verbose,
-                'mode': mode,
-            }
-        else:
-            del self.__dict__["_early_stopping"]
-
-    def validation_split(self, validation_split, **kwargs):
-        self._validation_split = validation_split
-
-    def validation_logger(self, validation_data, validation_scorer, **kwargs):
-        self._validation_data = validation_data
-        self._validation_scorer = validation_scorer
-
-    def _features(self, layer_name=None, layer_index=-2):
-        if layer_name is None:
-            layer_name = self.model_.layers[layer_index].name
-        intermediate_layer_model = Model(inputs=self.model_.input, outputs=self.model_.get_layer(layer_name).output)
-        return intermediate_layer_model
-
-    def log_dir(self, value='./out/logs'):
-        self._log_dir = value
 
 
 # ======================================================================================================================
