@@ -18,7 +18,7 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
     An more abstract version of KerasClassifier for scikit-learn with custom preprocess pipeline.
     """
 
-    def __init__(self, batch_size=16, epochs=8, output='classify'):
+    def __init__(self, batch_size=16, epochs=8):
         """
         Initialize the Classifier.
 
@@ -27,7 +27,6 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         """
         self.batch_size = batch_size
         self.epochs = epochs
-        self.output = output
 
     def fit(self, X, y=None):
         """
@@ -76,7 +75,7 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
             else:
                 return self._features().predict(X)
         y = self.predict_proba(X)
-        return y if self.output == 'multilabel' else np.argmax(y, axis=1, out=None)  # multiclass/binary
+        return np.argmax(y, axis=1, out=None)
 
     # predicts probability output
     def predict_proba(self, X):
@@ -132,7 +131,7 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         with open(model_path, 'w') as f:
             f.write(self.model_.to_json())
         with open(args_path, 'w') as f:
-            json.dump({'batch_size': self.batch_size, 'epochs': self.epochs, 'output': self.output}, f)
+            json.dump({'batch_size': self.batch_size, 'epochs': self.epochs}, f)
 
     def load(self, path):
         """
@@ -156,7 +155,6 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
             kwargs = json.load(f)
             self.batch_size = kwargs['batch_size']
             self.epochs = kwargs['epochs']
-            self.output = kwargs['output']
 
     @abstractmethod
     def preprocess(self, X, y=None):

@@ -4,7 +4,6 @@ from keras import Model, Input, Sequential
 from keras.engine import InputLayer
 from keras.layers import Embedding, Conv1D, GlobalMaxPooling1D, GlobalAveragePooling1D, \
     Dropout, LSTM, Dense, MaxPooling1D, AveragePooling1D
-from keras.utils import to_categorical
 from scipy.sparse import isspmatrix
 
 from tklearn.utils.collections import isiterable
@@ -12,8 +11,8 @@ from .base import KerasClassifier
 
 
 class FNNClassifier(KerasClassifier):
-    def __init__(self, hidden_dims=None, batch_size=16, epochs=8, output='classify', **kwargs):
-        super(FNNClassifier, self).__init__(batch_size, epochs, output)
+    def __init__(self, hidden_dims=None, batch_size=16, epochs=8, **kwargs):
+        super(FNNClassifier, self).__init__(batch_size, epochs)
         if hidden_dims is None:
             hidden_dims = []
         self.hidden_dims = hidden_dims
@@ -21,14 +20,12 @@ class FNNClassifier(KerasClassifier):
     def preprocess(self, X, y=None):
         if isspmatrix(X):
             X = np.array(X.todense())
-        assert len(X) >= 1, 'Sample size should be grater than or equal to 1 found {}'.format(len(X))
         if not hasattr(self, 'num_features_'):
             self.num_features_ = len(X[0])
         if y is not None:
-            if not self.output == 'multilabel' and not self.output == 'multiclass':
-                y = to_categorical(y)
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
+        assert len(X) >= 1, 'Sample size should be grater than or equal to 1 found {}'.format(len(X))
         return X, y
 
     def build_model(self, X, y):
@@ -61,7 +58,7 @@ class FNNClassifier(KerasClassifier):
 
 class CNNClassifier(KerasClassifier):
     def __init__(self, filters=250, kernel_size=3, pooling='max', dropout=None, hidden_dims=None, trainable=False,
-                 batch_size=32, epochs=15, output='classify', **kwargs):
+                 batch_size=32, epochs=15, **kwargs):
         """
         Initializes the classifier
 
@@ -74,7 +71,7 @@ class CNNClassifier(KerasClassifier):
         :param batch_size: Number of samples per gradient update. If unspecified, it will default to 32.
         :param epochs: Number of epochs to train the model. An epoch is an iteration over the entire x and y data provided.
         """
-        super(CNNClassifier, self).__init__(batch_size, epochs, output)
+        super(CNNClassifier, self).__init__(batch_size, epochs)
         self.filters = filters
         self.pooling = pooling
         self.dropout = dropout
@@ -92,7 +89,6 @@ class CNNClassifier(KerasClassifier):
             self.kernel_size = [self.kernel_size]
 
     def preprocess(self, X, y=None):
-
         if not hasattr(self, 'embedding_matrix_'):
             self.embedding_matrix_ = X['embedding_matrix']
         if not hasattr(self, 'vocab_size_'):
@@ -100,8 +96,6 @@ class CNNClassifier(KerasClassifier):
         if not hasattr(self, 'sequence_length_'):
             self.sequence_length_ = X['tokens'].shape[1]
         if y is not None:
-            if not self.output == 'multilabel' and not self.output == 'multiclass':
-                y = to_categorical(y)
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
         X = X['tokens']
@@ -159,7 +153,7 @@ class CNNClassifier(KerasClassifier):
 class LSTMClassifier(KerasClassifier):
     def __init__(self, trainable=False, lstm_units=150, hidden_dims=None, batch_size=16, epochs=8, output='classify',
                  **kwargs):
-        super(LSTMClassifier, self).__init__(batch_size, epochs, output)
+        super(LSTMClassifier, self).__init__(batch_size, epochs)
         self.trainable = trainable
         self.hidden_dims = hidden_dims
         self.lstm_units = lstm_units
@@ -180,8 +174,6 @@ class LSTMClassifier(KerasClassifier):
         if not hasattr(self, 'vocab_size_'):
             self.vocab_size_ = self.embedding_matrix_.shape[0]
         if y is not None:
-            if not self.output == 'multilabel' and not self.output == 'multiclass':
-                y = to_categorical(y)
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
         return tokens, y
@@ -237,7 +229,7 @@ class CNNLSTMClassifier(KerasClassifier):
         :param batch_size: Number of samples per gradient update. If unspecified, it will default to 32.
         :param epochs: Number of epochs to train the model. An epoch is an iteration over the entire x and y data provided.
         """
-        super(CNNLSTMClassifier, self).__init__(batch_size, epochs, output)
+        super(CNNLSTMClassifier, self).__init__(batch_size, epochs)
         self.filters = filters
         self.pooling = pooling
         self.pool_size = pool_size
@@ -264,8 +256,6 @@ class CNNLSTMClassifier(KerasClassifier):
         if not hasattr(self, 'sequence_length_'):
             self.sequence_length_ = X['tokens'].shape[1]
         if y is not None:
-            if not self.output == 'multilabel' and not self.output == 'multiclass':
-                y = to_categorical(y)
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
         X = X['tokens']
@@ -337,7 +327,7 @@ class LSTMCNNClassifier(KerasClassifier):
         :param batch_size: Number of samples per gradient update. If unspecified, it will default to 32.
         :param epochs: Number of epochs to train the model. An epoch is an iteration over the entire x and y data provided.
         """
-        super(LSTMCNNClassifier, self).__init__(batch_size, epochs, output)
+        super(LSTMCNNClassifier, self).__init__(batch_size, epochs)
         self.filters = filters
         self.pooling = pooling
         self.dropout = dropout
@@ -363,8 +353,6 @@ class LSTMCNNClassifier(KerasClassifier):
         if not hasattr(self, 'sequence_length_'):
             self.sequence_length_ = X['tokens'].shape[1]
         if y is not None:
-            if not self.output == 'multilabel' and not self.output == 'multiclass':
-                y = to_categorical(y)
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
         X = X['tokens']
