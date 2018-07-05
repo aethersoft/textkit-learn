@@ -69,7 +69,12 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         """
         if hasattr(self, '_transfer'):
             X, _ = self.preprocess(X)
-            return self._features(self._tlayer if hasattr(self, '_tlayer') else None).predict(X)
+            if hasattr(self, '_tlayer'):
+                if isinstance(self._tlayer, int):
+                    return self._features(layer_index=self._tlayer).predict(X)
+                return self._features(layer_name=self._tlayer).predict(X)
+            else:
+                return self._features().predict(X)
         y = self.predict_proba(X)
         return y if self.output == 'multilabel' else np.argmax(y, axis=1, out=None)  # multiclass/binary
 
@@ -192,11 +197,10 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         self._validation_data = validation_data
         self._validation_scorer = validation_scorer
 
-    def _features(self, layer_name=None):
+    def _features(self, layer_name=None, layer_index=-2):
         if layer_name is None:
-            layer_name = self.model_.layers[-2].name
-        intermediate_layer_model = Model(inputs=self.model_.input,
-                                         outputs=self.model_.get_layer(layer_name).output)
+            layer_name = self.model_.layers[layer_index].name
+        intermediate_layer_model = Model(inputs=self.model_.input, outputs=self.model_.get_layer(layer_name).output)
         return intermediate_layer_model
 
     def log_dir(self, value='./out/logs'):
@@ -256,7 +260,12 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
         """
         X, _ = self.preprocess(X)
         if hasattr(self, '_transfer'):
-            return self._features(self._tlayer if hasattr(self, '_tlayer') else None).predict(X)
+            if hasattr(self, '_tlayer'):
+                if isinstance(self._tlayer, int):
+                    return self._features(layer_index=self._tlayer).predict(X)
+                return self._features(layer_name=self._tlayer).predict(X)
+            else:
+                return self._features().predict(X)
         return self.model_.predict(X)
 
     def score(self, X, y, sample_weight=None):
@@ -373,9 +382,8 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
         self._validation_data = validation_data
         self._validation_scorer = validation_scorer
 
-    def _features(self, layer_name=None):
+    def _features(self, layer_name=None, layer_index=-2):
         if layer_name is None:
-            layer_name = self.model_.layers[-2].name
-        intermediate_layer_model = Model(inputs=self.model_.input,
-                                         outputs=self.model_.get_layer(layer_name).output)
+            layer_name = self.model_.layers[layer_index].name
+        intermediate_layer_model = Model(inputs=self.model_.input, outputs=self.model_.get_layer(layer_name).output)
         return intermediate_layer_model
