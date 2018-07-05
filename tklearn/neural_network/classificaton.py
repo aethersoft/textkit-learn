@@ -4,6 +4,7 @@ from keras import Model, Input, Sequential
 from keras.engine import InputLayer
 from keras.layers import Embedding, Conv1D, GlobalMaxPooling1D, GlobalAveragePooling1D, \
     Dropout, LSTM, Dense, MaxPooling1D, AveragePooling1D
+from keras.utils import to_categorical
 from scipy.sparse import isspmatrix
 
 from tklearn.utils.collections import isiterable
@@ -16,6 +17,7 @@ class FNNClassifier(KerasClassifier):
         if hidden_dims is None:
             hidden_dims = []
         self.hidden_dims = hidden_dims
+        assert len(X) >= 1, 'Sample size should be grater than or equal to 1 found {}'.format(len(X))
 
     def preprocess(self, X, y=None):
         if isspmatrix(X):
@@ -23,9 +25,10 @@ class FNNClassifier(KerasClassifier):
         if not hasattr(self, 'num_features_'):
             self.num_features_ = len(X[0])
         if y is not None:
+            if not isiterable(y[0]):
+                y = to_categorical(y)
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
-        assert len(X) >= 1, 'Sample size should be grater than or equal to 1 found {}'.format(len(X))
         return X, y
 
     def build_model(self, X, y):
@@ -96,6 +99,8 @@ class CNNClassifier(KerasClassifier):
         if not hasattr(self, 'sequence_length_'):
             self.sequence_length_ = X['tokens'].shape[1]
         if y is not None:
+            if not isiterable(y[0]):
+                y = to_categorical(y)
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
         X = X['tokens']
@@ -173,6 +178,8 @@ class LSTMClassifier(KerasClassifier):
         if not hasattr(self, 'vocab_size_'):
             self.vocab_size_ = self.embedding_matrix_.shape[0]
         if y is not None:
+            if not isiterable(y[0]):
+                y = to_categorical(y)
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
         return tokens, y
@@ -255,6 +262,8 @@ class CNNLSTMClassifier(KerasClassifier):
         if not hasattr(self, 'sequence_length_'):
             self.sequence_length_ = X['tokens'].shape[1]
         if y is not None:
+            if not isiterable(y[0]):
+                y = to_categorical(y)
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
         X = X['tokens']
@@ -352,6 +361,8 @@ class LSTMCNNClassifier(KerasClassifier):
         if not hasattr(self, 'sequence_length_'):
             self.sequence_length_ = X['tokens'].shape[1]
         if y is not None:
+            if not isiterable(y[0]):
+                y = to_categorical(y)
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
         X = X['tokens']
