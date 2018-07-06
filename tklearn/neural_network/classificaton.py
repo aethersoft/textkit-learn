@@ -17,11 +17,11 @@ class FNNClassifier(KerasClassifier):
         if hidden_dims is None:
             hidden_dims = []
         self.hidden_dims = hidden_dims
-        assert len(X) >= 1, 'Sample size should be grater than or equal to 1 found {}'.format(len(X))
 
     def preprocess(self, X, y=None):
         if isspmatrix(X):
             X = np.array(X.todense())
+        assert len(X) >= 1, 'Sample size should be grater than or equal to 1 found {}'.format(len(X))
         if not hasattr(self, 'num_features_'):
             self.num_features_ = len(X[0])
         if y is not None:
