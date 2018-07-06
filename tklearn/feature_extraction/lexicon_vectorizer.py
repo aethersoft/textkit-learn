@@ -568,7 +568,7 @@ class LexiconVectorizer(FunctionTransformer):
             path = resource_path('lexicons', 'NRC10E', 'w2v-dp-BCC-Lex.txt.gz')
             return EmotionLexiconScorer(path)
         elif filter == 'SentiWordNet':
-            path = resource_path('lexicons', 'SentiWordNet', 'SentiWordNet_3.0.0.txt.gzz')
+            path = resource_path('lexicons', 'SentiWordNet', 'SentiWordNet_3.0.0.txt.gz')
             return SentiWordnetScorer(path)
         elif filter == 'Negations':
             path = resource_path('lexicons', 'Negations', 'NegatingWordList.txt.gz')
