@@ -27,6 +27,7 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         """
         self.batch_size = batch_size
         self.epochs = epochs
+        self._return_probs = False
 
     def fit(self, X, y=None):
         """
@@ -75,7 +76,10 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
             else:
                 return self._features().predict(X)
         y = self.predict_proba(X)
-        return np.argmax(y, axis=1, out=None)
+        if self._return_probs:
+            return y
+        else:
+            return np.argmax(y, axis=1, out=None)
 
     # predicts probability output
     def predict_proba(self, X):

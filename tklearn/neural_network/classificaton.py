@@ -27,6 +27,8 @@ class FNNClassifier(KerasClassifier):
         if y is not None:
             if not isiterable(y[0]):
                 y = to_categorical(y)
+            else:
+                self._return_probs = True
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
         return X, y
@@ -101,6 +103,8 @@ class CNNClassifier(KerasClassifier):
         if y is not None:
             if not isiterable(y[0]):
                 y = to_categorical(y)
+            else:
+                self._return_probs = True
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
         X = X['tokens']
@@ -180,6 +184,8 @@ class LSTMClassifier(KerasClassifier):
         if y is not None:
             if not isiterable(y[0]):
                 y = to_categorical(y)
+            else:
+                self._return_probs = True
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
         return tokens, y
@@ -264,6 +270,8 @@ class CNNLSTMClassifier(KerasClassifier):
         if y is not None:
             if not isiterable(y[0]):
                 y = to_categorical(y)
+            else:
+                self._return_probs = True
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
         X = X['tokens']
@@ -363,6 +371,8 @@ class LSTMCNNClassifier(KerasClassifier):
         if y is not None:
             if not isiterable(y[0]):
                 y = to_categorical(y)
+            else:
+                self._return_probs = True
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
         X = X['tokens']
