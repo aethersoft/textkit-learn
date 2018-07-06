@@ -183,7 +183,7 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         with open(model_path, 'w') as f:
             f.write(self.model_.to_json())
         with open(args_path, 'w') as f:
-            json.dump({'batch_size': self.batch_size, 'epochs': self.epochs}, f)
+            json.dump({'batch_size': self.batch_size, 'epochs': self.epochs, '_return_probs': self._return_probs}, f)
 
     def load(self, path):
         """
@@ -207,6 +207,7 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
             kwargs = json.load(f)
             self.batch_size = kwargs['batch_size']
             self.epochs = kwargs['epochs']
+            self._return_probs = kwargs['_return_probs']
 
 
 # ======================================================================================================================
