@@ -46,7 +46,7 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         if hasattr(self, '_validation_data') and hasattr(self, '_validation_scorer'):
             callbacks.append(ValidationLogger(self._validation_data, self._validation_scorer))
         if not hasattr(self, '_log_dir'):
-            self.log_dir('./out/logs')
+            self.log_dir('./logs')
         tb = TensorBoard(log_dir=self._log_dir, histogram_freq=0, batch_size=32, write_graph=True,
                          write_grads=False, write_images=False, embeddings_freq=0, embeddings_layer_names=None,
                          embeddings_metadata=None)
@@ -159,7 +159,7 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         intermediate_layer_model = Model(inputs=self.model_.input, outputs=self.model_.get_layer(layer_name).output)
         return intermediate_layer_model
 
-    def log_dir(self, value='./out/logs'):
+    def log_dir(self, value='./logs'):
         self._log_dir = value
 
     def __getstate__(self):

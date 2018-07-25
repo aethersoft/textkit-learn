@@ -51,6 +51,7 @@ class FNNClassifier(KerasClassifier):
                 model.add(Dense(dim[0], activation='relu'))
                 model.add(Dropout(dim[1]))
             else:
+                print(dim)
                 model.add(Dense(dim, activation='relu'))
 
         # Output layer with sigmoid activation:
