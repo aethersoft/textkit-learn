@@ -4,7 +4,7 @@ A Natural Language Learning Toolkit
 This repository contains a scikit-compatible learning tools for Natural Language Processing.
 
 
-# Prequisits
+# How to Setup
 * pip install .
 * Don't install jnius from pip instead install it from [source](https://github.com/kivy/pyjnius).
 * Create enviroment variable 'TKLEARN_RESOURCES' pointing to resource folder.
