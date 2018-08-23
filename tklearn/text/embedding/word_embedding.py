@@ -8,8 +8,10 @@ import pandas as pd
 import six
 
 __all__ = [
+    'WordEmbedding',
     'load_word2vec',
-    'load_glove'
+    'load_glove',
+    'load_embedding'
 ]
 
 
