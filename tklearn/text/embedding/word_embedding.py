@@ -27,7 +27,7 @@ class WordEmbedding:
 
     @property
     def vocabulary(self):
-        if isinstance(self.word_embedding, dict):
+        if hasattr(self.word_embedding, 'keys'):
             return set(self.word_embedding.keys())
         if hasattr(self.word_embedding, 'vocab'):
             vocab = set(self.word_embedding.vocab.keys())
