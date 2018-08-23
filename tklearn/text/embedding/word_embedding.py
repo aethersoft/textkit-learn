@@ -25,14 +25,14 @@ class WordEmbedding:
 
     @property
     def vocabulary(self):
-        if isinstance(self.word_embedding, pd.DataFrame):
-            raise NotImplementedError
         if isinstance(self.word_embedding, dict):
             return set(self.word_embedding.keys())
-        vocab = set(self.word_embedding.vocab.keys())
-        for e in self.secondary_word_embeddings:
-            vocab.update(e.vocabulary)
-        return vocab
+        if hasattr(self.word_embedding, 'vocab'):
+            vocab = set(self.word_embedding.vocab.keys())
+            for e in self.secondary_word_embeddings:
+                vocab.update(e.vocabulary)
+            return vocab
+        raise NotImplementedError
 
     def append(self, e):
         """
