@@ -4,7 +4,12 @@ from subprocess import run, PIPE
 from tempfile import mkstemp
 
 
-class TweetNLP:
+class CMUTweetTagger:
+    """
+    A tokenizer and a part-of-speech tagger for Tweets in English.
+
+    See [TweetNLP](http://www.cs.cmu.edu/~ark/TweetNLP/) for more details.
+    """
     TAGGER_CMD = 'java -XX:ParallelGCThreads=2 -Xmx500m -jar'
     CLUSTERS_PATH = ['..', 'data', 'wordtypes-v0.1', '50mpaths2.txt']
 
@@ -13,7 +18,7 @@ class TweetNLP:
         self._initialize()
 
     def _initialize(self):
-        f_path = os.path.join(self.tweet_nlp, *TweetNLP.CLUSTERS_PATH)
+        f_path = os.path.join(self.tweet_nlp, *CMUTweetTagger.CLUSTERS_PATH)
         self.records_ = {}
         self.labels_ = set()
         with open(f_path, 'r', encoding='utf-8') as f:
@@ -82,7 +87,7 @@ class TweetNLP:
         try:
             with open(fd, 'w', encoding='utf-8') as tmp:
                 tmp.write(message)
-            args = shlex.split(TweetNLP.TAGGER_CMD)
+            args = shlex.split(CMUTweetTagger.TAGGER_CMD)
             args.append(self.tweet_nlp.replace('\\', '\\\\'))
             args.append('--output-format')
             args.append('conll')

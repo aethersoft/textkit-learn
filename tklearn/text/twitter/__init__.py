@@ -1,7 +1,5 @@
-from .TwitterNLP import TweetNLP
-from .base import clean_tweet
+from .cmu import CMUTweetTagger
 
 __all__ = [
-    'TweetNLP',
-    'clean_tweet',
+    'CMUTweetTagger',
 ]
