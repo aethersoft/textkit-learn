@@ -8,7 +8,6 @@ import nltk
 import numpy as np
 from sklearn.preprocessing import FunctionTransformer
 
-from tklearn.text.tokens import bigrams
 from tklearn.utils.collections import dmerge
 from tklearn.utils.resource import resource_path
 
@@ -108,7 +107,8 @@ class PolarityScorer:
     Gives the input tokens a polarity score based on lexicons
     """
 
-    def __init__(self, *lexicon_paths):
+    def __init__(self, *lexicon_paths, **kwargs):
+        self.bigram = kwargs['bigram'] if 'bigram' in kwargs else True  # Default value is False
         lexicon_maps = []
         for lexicon_path in lexicon_paths:
             with gzip.open(lexicon_path, 'rb') as f:
@@ -120,12 +120,12 @@ class PolarityScorer:
                 lexicon_maps.append(lexicon_map)
         self.lexicon_map_ = dmerge(*lexicon_maps)
 
-    def transform(self, text, bigram=True):
+    def transform(self, text):
         _word_pattern = re.compile('#?\w+', flags=re.UNICODE)
         tokens = _word_pattern.findall(text)
         unigrams = tokens
-        if bigram:
-            bt = bigrams(tokens)
+        if self.bigram:
+            bt = nltk.bigrams(tokens)
             scores = [x + y for x, y in zip(self.extract_scores(unigrams), self.extract_scores(bt))]
         else:
             scores = self.extract_scores(unigrams)
@@ -137,6 +137,7 @@ class PolarityScorer:
         """
         positive_score, negative_score = 0.0, 0.0
         for token in tokens:
+            token = ' '.join(token) if isinstance(token, tuple) else token
             token = token.lower()
             if token in self.lexicon_map_:
                 if self.lexicon_map_[token] >= 0:
