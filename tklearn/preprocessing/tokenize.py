@@ -4,7 +4,7 @@ import nltk
 import numpy as np
 from sklearn.preprocessing import FunctionTransformer
 
-from tklearn.text.twitter import TweetNLP
+from tklearn.text.twitter import CMUTweetTagger
 
 __all__ = [
     'Tokenizer',
@@ -55,7 +55,7 @@ class TweetTokenizer(Tokenizer):
             self.tokenizer = nltk.TweetTokenizer()
 
     def tokenize(self, itr):
-        if isinstance(self.tokenizer, TweetNLP):
+        if isinstance(self.tokenizer, CMUTweetTagger):
             tag_set = self.tokenizer.tag(itr)
             return [list(list(zip(*tags))[0]) for tags in tag_set]
         elif hasattr(self.tokenizer, 'tokenize'):
