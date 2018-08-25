@@ -43,12 +43,19 @@ class LexiconFeaturizerTestCase(unittest.TestCase):
         res = l.fit_transform([text])
         assert np.sum(res) > 0, 'Invalid implementation of {}'.format(lexicon)
 
-    def test_nrc_emotion(self):
+    def test_nrc_emoticon(self):
         lexicon = 'NRCWEA'
         l = LexiconVectorizer(lexicon)
         text = 'This is utterly excellent!'
         res = l.fit_transform([text])
         assert np.sum(res) > 0, 'Invalid implementation of {}'.format(lexicon)
+
+    def test_afinn_emoticon(self):
+        lexicon = 'emoticon'
+        l = LexiconVectorizer(lexicon)
+        text = 'This is utterly excellent! :)'
+        res = l.fit_transform([text])
+        assert np.sum(res) == 2.0, 'Invalid implementation of {}'.format(lexicon)
 
     def test_nrc_affect_int(self):
         lexicon = 'NRCAI'
