@@ -1,6 +1,6 @@
-from .embedding_transformer import EmbeddingTransformer
-from .lexicon_vectorizer import LexiconVectorizer
-from .transfer_featurizer import TransferFeaturizer
+from .embedding import EmbeddingTransformer
+from .lexicon import LexiconVectorizer
+from .transfer import TransferFeaturizer
 
 __all__ = [
     'LexiconVectorizer',

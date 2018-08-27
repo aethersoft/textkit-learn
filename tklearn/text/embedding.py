@@ -11,8 +11,38 @@ __all__ = [
     'WordEmbedding',
     'load_word2vec',
     'load_glove',
-    'load_embedding'
+    'load_embedding',
+    'get_weights'
 ]
+
+
+def get_weights(word_embedding=None, vocabulary=None, default=None):
+    """
+    Creates the weight matrix from word embeddings and vocabulary
+
+    :param word_embedding: Word Embedding to be extracted
+    :param vocabulary: vocabulary to use the word embedding
+    :param default: default value of word embedding is absent. possible values ['random', 'zero']
+    :return: tuple of weight matrix and word index
+    """
+    if word_embedding is None:
+        word_embedding = WordEmbedding({}, 0)
+    if vocabulary is None:
+        vocabulary = set()
+    dim = word_embedding.vector_size
+    weight_mat = [np.zeros(dim)]
+    word_idx = dict()
+    for w in vocabulary:
+        temp = word_embedding[w]
+        if temp is None and isinstance(default, str):
+            if 'random' == default.lower():
+                temp = np.random.rand(dim)
+            elif 'zero' == default.lower():
+                temp = np.zeros(dim)
+        if temp is not None:
+            word_idx[w] = len(weight_mat)
+            weight_mat.append(temp)
+    return weight_mat, word_idx
 
 
 class WordEmbedding:
