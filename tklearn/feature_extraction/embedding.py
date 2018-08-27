@@ -1,15 +1,18 @@
 import numpy as np
 import six
+from keras.preprocessing import sequence
 from sklearn.base import BaseEstimator, TransformerMixin
 
 
 class EmbeddingTransformer(BaseEstimator, TransformerMixin):
-    def __init__(self, word_index=None, tokenizer=None, preprocess=None, output=None, weight_mat=None, *args, **kwargs):
+    def __init__(self, word_index=None, tokenizer=None, preprocess=None, padding=0, output=None,
+                 weight_mat=None, *args, **kwargs):
         self.word_index = word_index
         self.tokenizer = tokenizer
         self.preprocess = preprocess
         self.output = output
         self.weight_mat = weight_mat
+        self.padding = padding
         self.verify()
 
     def verify(self):
@@ -37,6 +40,10 @@ class EmbeddingTransformer(BaseEstimator, TransformerMixin):
         for tokens in self.tokenizer(pt):
             seq.append([self.word_index[w] for w in tokens if w in self.word_index])
         if self.output is None or self.output.startswith('seq'):
+            if self.padding:
+                assert isinstance(self.padding, int), \
+                    'Invalid input for pad_sequence. Please provide an integer value for `pad_sequence` parameter.'
+                seq = sequence.pad_sequences(seq, maxlen=self.padding, truncating='post')
             return seq
         if self.output.startswith('avg'):
             dim = len(self.weight_mat[0])
