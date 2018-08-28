@@ -37,7 +37,8 @@ class EmbeddingTransformer(BaseEstimator, TransformerMixin):
                 "string object received.")
         seq = []
         pt = self.preprocess(X) if self.preprocess is not None else X
-        for tokens in self.tokenizer(pt):
+        tokenize = self.tokenizer.tokenize if hasattr(self.tokenizer, 'tokenize') else self.tokenizer
+        for tokens in tokenize(pt):
             seq.append([self.word_index[w] for w in tokens if w in self.word_index])
         if self.output is None or self.output.startswith('seq'):
             if self.padding:
@@ -47,12 +48,18 @@ class EmbeddingTransformer(BaseEstimator, TransformerMixin):
             return seq
         if self.output.startswith('avg'):
             dim = len(self.weight_mat[0])
-            avg_emb = np.average([self.weight_mat[e] for e in seq], axis=0) if len(seq) > 0 else np.zeros(dim)
-            return avg_emb
+            result = []
+            for x in seq:
+                avg = np.average([self.weight_mat[e] for e in x], axis=0) if len(x) > 0 else np.zeros(dim)
+                result.append(avg)
+            return np.array(result)
         if self.output.startswith('sum'):
             dim = len(self.weight_mat[0])
-            sum_emb = np.sum([self.weight_mat[e] for e in seq], axis=0) if len(seq) > 0 else np.zeros(dim)
-            return sum_emb
+            result = []
+            for x in seq:
+                avg = np.sum([self.weight_mat[e] for e in x], axis=0) if len(x) > 0 else np.zeros(dim)
+                result.append(avg)
+            return np.array(result)
 
     def fit_transform(self, X, y=None, **fit_params):
         return self.fit(X, y).transform(X)

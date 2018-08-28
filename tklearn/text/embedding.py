@@ -42,7 +42,7 @@ def get_weights(word_embedding=None, vocabulary=None, default=None):
         if temp is not None:
             word_idx[w] = len(weight_mat)
             weight_mat.append(temp)
-    return weight_mat, word_idx
+    return np.array(weight_mat), word_idx
 
 
 class WordEmbedding:

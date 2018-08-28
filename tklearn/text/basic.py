@@ -24,6 +24,7 @@ def build_vocabulary(texts=None, tokenizer=None, preprocess=None):
         def preprocess(ts):
             return ts
     vocab = set()
-    for x in tokenizer(preprocess(texts)):
+    tokenize = tokenizer.tokenize if hasattr(tokenizer, 'tokenize') else tokenizer
+    for x in tokenize(preprocess(texts)):
         vocab.update(x)
     return vocab

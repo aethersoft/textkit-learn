@@ -10,7 +10,7 @@ class EmbeddingTransformerTestCase(unittest.TestCase):
         train_text = ['this is random sample 2']
         test_text = ['this is random sample']
         corpus = train_text + test_text
-        tokenizer = TweetTokenizer().tokenize
+        tokenizer = TweetTokenizer()
         vocab = build_vocabulary(corpus, tokenizer=tokenizer, preprocess=None)
         weight_mat, word_idx = get_weights(vocabulary=vocab, default='random')
         transformer = EmbeddingTransformer(word_index=word_idx, tokenizer=tokenizer, preprocess=None)

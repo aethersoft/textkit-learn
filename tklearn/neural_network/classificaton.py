@@ -63,7 +63,8 @@ class FNNClassifier(KerasClassifier):
 
 
 class CNNClassifier(KerasClassifier):
-    def __init__(self, filters=250, kernel_size=3, pooling='max', dropout=None, hidden_dims=None, trainable=False,
+    def __init__(self, weight_mat=None, filters=250, kernel_size=3, pooling='max', dropout=None, hidden_dims=None,
+                 trainable=False,
                  batch_size=32, epochs=15, **kwargs):
         """
         Initializes the classifier
@@ -84,6 +85,7 @@ class CNNClassifier(KerasClassifier):
         self.kernel_size = kernel_size
         self.hidden_dims = hidden_dims
         self.trainable = trainable
+        self.weight_mat = weight_mat
         self.initialize()
 
     def initialize(self):
@@ -95,12 +97,10 @@ class CNNClassifier(KerasClassifier):
             self.kernel_size = [self.kernel_size]
 
     def preprocess(self, X, y=None):
-        if not hasattr(self, 'embedding_matrix_'):
-            self.embedding_matrix_ = X['embedding_matrix']
         if not hasattr(self, 'vocab_size_'):
-            self.vocab_size_ = self.embedding_matrix_.shape[0]
+            self.vocab_size_ = len(self.weight_mat)
         if not hasattr(self, 'sequence_length_'):
-            self.sequence_length_ = X['tokens'].shape[1]
+            self.sequence_length_ = X.shape[1]
         if y is not None:
             if not isiterable(y[0]):
                 y = to_categorical(y)
@@ -108,7 +108,6 @@ class CNNClassifier(KerasClassifier):
                 self._return_probs = True
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
-        X = X['tokens']
         return X, y
 
     def build_model(self, X, y):
@@ -121,7 +120,7 @@ class CNNClassifier(KerasClassifier):
         opt = ipt
 
         # Embedding layer (Extracts embedding from embedding matrix according to input index sequence)
-        e0 = Embedding(self.vocab_size_, self.embedding_matrix_.shape[1], weights=[self.embedding_matrix_],
+        e0 = Embedding(self.vocab_size_, self.weight_mat.shape[1], weights=[self.weight_mat],
                        input_length=self.sequence_length_, trainable=self.trainable)
         opt = e0(opt)
 
@@ -161,11 +160,13 @@ class CNNClassifier(KerasClassifier):
 
 
 class LSTMClassifier(KerasClassifier):
-    def __init__(self, trainable=False, lstm_units=150, hidden_dims=None, batch_size=16, epochs=8, **kwargs):
+    def __init__(self, weight_mat=None, trainable=False, lstm_units=150, hidden_dims=None, batch_size=16, epochs=8,
+                 **kwargs):
         super(LSTMClassifier, self).__init__(batch_size, epochs)
         self.trainable = trainable
         self.hidden_dims = hidden_dims
         self.lstm_units = lstm_units
+        self.weight_mat = weight_mat
         self.initialize()
 
     def initialize(self):
@@ -175,13 +176,10 @@ class LSTMClassifier(KerasClassifier):
             self.hidden_dims = list(self.hidden_dims)
 
     def preprocess(self, X, y=None):
-        tokens = X['tokens']
-        if not hasattr(self, 'embedding_matrix_'):
-            self.embedding_matrix_ = X['embedding_matrix']
-        if not hasattr(self, 'sequence_length_'):
-            self.sequence_length_ = tokens.shape[1]
         if not hasattr(self, 'vocab_size_'):
-            self.vocab_size_ = self.embedding_matrix_.shape[0]
+            self.vocab_size_ = len(self.weight_mat)
+        if not hasattr(self, 'sequence_length_'):
+            self.sequence_length_ = X.shape[1]
         if y is not None:
             if not isiterable(y[0]):
                 y = to_categorical(y)
@@ -189,7 +187,7 @@ class LSTMClassifier(KerasClassifier):
                 self._return_probs = True
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
-        return tokens, y
+        return X, y
 
     def build_model(self, X, y):
         """
@@ -201,8 +199,8 @@ class LSTMClassifier(KerasClassifier):
 
         model.add(InputLayer(input_shape=(self.sequence_length_,), sparse=False, dtype='int32'))
         model.add(Embedding(self.vocab_size_,
-                            self.embedding_matrix_.shape[1],
-                            weights=[self.embedding_matrix_],
+                            self.weight_mat.shape[1],
+                            weights=[self.weight_mat],
                             input_length=self.sequence_length_,
                             trainable=self.trainable))
         # Add LSTM layer
@@ -227,7 +225,7 @@ class LSTMClassifier(KerasClassifier):
 
 
 class CNNLSTMClassifier(KerasClassifier):
-    def __init__(self, filters=250, kernel_size=3, pooling='max', dropout=None, lstm_units=300,
+    def __init__(self, weight_mat=None, filters=250, kernel_size=3, pooling='max', dropout=None, lstm_units=300,
                  pool_size=1, hidden_dims=None, trainable=False, batch_size=32, epochs=15, **kwargs):
         """
         Initializes the classifier
@@ -251,6 +249,7 @@ class CNNLSTMClassifier(KerasClassifier):
         self.kernel_size = kernel_size
         self.hidden_dims = hidden_dims
         self.trainable = trainable
+        self.weight_mat = weight_mat
         self.initialize()
 
     def initialize(self):
@@ -262,12 +261,10 @@ class CNNLSTMClassifier(KerasClassifier):
             self.kernel_size = [self.kernel_size]
 
     def preprocess(self, X, y=None):
-        if not hasattr(self, 'embedding_matrix_'):
-            self.embedding_matrix_ = X['embedding_matrix']
         if not hasattr(self, 'vocab_size_'):
-            self.vocab_size_ = self.embedding_matrix_.shape[0]
+            self.vocab_size_ = len(self.weight_mat)
         if not hasattr(self, 'sequence_length_'):
-            self.sequence_length_ = X['tokens'].shape[1]
+            self.sequence_length_ = X.shape[1]
         if y is not None:
             if not isiterable(y[0]):
                 y = to_categorical(y)
@@ -275,7 +272,6 @@ class CNNLSTMClassifier(KerasClassifier):
                 self._return_probs = True
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
-        X = X['tokens']
         return X, y
 
     def build_model(self, X, y):
@@ -288,7 +284,7 @@ class CNNLSTMClassifier(KerasClassifier):
         opt = ipt
 
         # Embedding layer (Extracts embedding from embedding matrix according to input index sequence)
-        e0 = Embedding(self.vocab_size_, self.embedding_matrix_.shape[1], weights=[self.embedding_matrix_],
+        e0 = Embedding(self.vocab_size_, self.weight_mat.shape[1], weights=[self.weight_mat],
                        input_length=self.sequence_length_, trainable=self.trainable)
         opt = e0(opt)
 
@@ -329,7 +325,8 @@ class CNNLSTMClassifier(KerasClassifier):
 
 
 class LSTMCNNClassifier(KerasClassifier):
-    def __init__(self, filters=250, kernel_size=3, pooling='max', dropout=None, lstm_units=300, hidden_dims=None,
+    def __init__(self, weight_mat=None, filters=250, kernel_size=3, pooling='max', dropout=None, lstm_units=300,
+                 hidden_dims=None,
                  trainable=False, batch_size=32, epochs=15, **kwargs):
         """
         Initializes the classifier
@@ -352,6 +349,7 @@ class LSTMCNNClassifier(KerasClassifier):
         self.kernel_size = kernel_size
         self.hidden_dims = hidden_dims
         self.trainable = trainable
+        self.weight_mat = weight_mat
         self.initialize()
 
     def initialize(self):
@@ -363,12 +361,10 @@ class LSTMCNNClassifier(KerasClassifier):
             self.kernel_size = [self.kernel_size]
 
     def preprocess(self, X, y=None):
-        if not hasattr(self, 'embedding_matrix_'):
-            self.embedding_matrix_ = X['embedding_matrix']
         if not hasattr(self, 'vocab_size_'):
-            self.vocab_size_ = self.embedding_matrix_.shape[0]
+            self.vocab_size_ = len(self.weight_mat)
         if not hasattr(self, 'sequence_length_'):
-            self.sequence_length_ = X['tokens'].shape[1]
+            self.sequence_length_ = X.shape[1]
         if y is not None:
             if not isiterable(y[0]):
                 y = to_categorical(y)
@@ -376,7 +372,6 @@ class LSTMCNNClassifier(KerasClassifier):
                 self._return_probs = True
             if not hasattr(self, 'num_categories_'):
                 self.num_categories_ = len(y[0])
-        X = X['tokens']
         return X, y
 
     def build_model(self, X, y):
@@ -389,7 +384,7 @@ class LSTMCNNClassifier(KerasClassifier):
         opt = ipt
 
         # Embedding layer (Extracts embedding from embedding matrix according to input index sequence)
-        e0 = Embedding(self.vocab_size_, self.embedding_matrix_.shape[1], weights=[self.embedding_matrix_],
+        e0 = Embedding(self.vocab_size_, self.weight_mat.shape[1], weights=[self.weight_mat],
                        input_length=self.sequence_length_, trainable=self.trainable)
         opt = e0(opt)
 
