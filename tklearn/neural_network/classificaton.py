@@ -95,10 +95,9 @@ class CNNClassifier(KerasClassifier):
             self.hidden_dims = list(self.hidden_dims)
         if not isiterable(self.kernel_size):
             self.kernel_size = [self.kernel_size]
+        self._vocab_size = len(self.weight_mat)
 
     def preprocess(self, X, y=None):
-        if not hasattr(self, 'vocab_size_'):
-            self.vocab_size_ = len(self.weight_mat)
         if not hasattr(self, 'sequence_length_'):
             self.sequence_length_ = X.shape[1]
         if y is not None:
@@ -120,7 +119,7 @@ class CNNClassifier(KerasClassifier):
         opt = ipt
 
         # Embedding layer (Extracts embedding from embedding matrix according to input index sequence)
-        e0 = Embedding(self.vocab_size_, self.weight_mat.shape[1], weights=[self.weight_mat],
+        e0 = Embedding(self._vocab_size, self.weight_mat.shape[1], weights=[self.weight_mat],
                        input_length=self.sequence_length_, trainable=self.trainable)
         opt = e0(opt)
 
@@ -174,10 +173,9 @@ class LSTMClassifier(KerasClassifier):
             self.hidden_dims = []
         else:
             self.hidden_dims = list(self.hidden_dims)
+        self._vocab_size = len(self.weight_mat)
 
     def preprocess(self, X, y=None):
-        if not hasattr(self, 'vocab_size_'):
-            self.vocab_size_ = len(self.weight_mat)
         if not hasattr(self, 'sequence_length_'):
             self.sequence_length_ = X.shape[1]
         if y is not None:
@@ -198,7 +196,7 @@ class LSTMClassifier(KerasClassifier):
         model = Sequential()
 
         model.add(InputLayer(input_shape=(self.sequence_length_,), sparse=False, dtype='int32'))
-        model.add(Embedding(self.vocab_size_,
+        model.add(Embedding(self._vocab_size,
                             self.weight_mat.shape[1],
                             weights=[self.weight_mat],
                             input_length=self.sequence_length_,
@@ -259,10 +257,9 @@ class CNNLSTMClassifier(KerasClassifier):
             self.hidden_dims = list(self.hidden_dims)
         if not isiterable(self.kernel_size):
             self.kernel_size = [self.kernel_size]
+        self._vocab_size = len(self.weight_mat)
 
     def preprocess(self, X, y=None):
-        if not hasattr(self, 'vocab_size_'):
-            self.vocab_size_ = len(self.weight_mat)
         if not hasattr(self, 'sequence_length_'):
             self.sequence_length_ = X.shape[1]
         if y is not None:
@@ -284,7 +281,7 @@ class CNNLSTMClassifier(KerasClassifier):
         opt = ipt
 
         # Embedding layer (Extracts embedding from embedding matrix according to input index sequence)
-        e0 = Embedding(self.vocab_size_, self.weight_mat.shape[1], weights=[self.weight_mat],
+        e0 = Embedding(self._vocab_size, self.weight_mat.shape[1], weights=[self.weight_mat],
                        input_length=self.sequence_length_, trainable=self.trainable)
         opt = e0(opt)
 
@@ -326,8 +323,7 @@ class CNNLSTMClassifier(KerasClassifier):
 
 class LSTMCNNClassifier(KerasClassifier):
     def __init__(self, weight_mat=None, filters=250, kernel_size=3, pooling='max', dropout=None, lstm_units=300,
-                 hidden_dims=None,
-                 trainable=False, batch_size=32, epochs=15, **kwargs):
+                 hidden_dims=None, trainable=False, batch_size=32, epochs=15, **kwargs):
         """
         Initializes the classifier
 
@@ -359,10 +355,9 @@ class LSTMCNNClassifier(KerasClassifier):
             self.hidden_dims = list(self.hidden_dims)
         if not isiterable(self.kernel_size):
             self.kernel_size = [self.kernel_size]
+        self._vocab_size = len(self.weight_mat)
 
     def preprocess(self, X, y=None):
-        if not hasattr(self, 'vocab_size_'):
-            self.vocab_size_ = len(self.weight_mat)
         if not hasattr(self, 'sequence_length_'):
             self.sequence_length_ = X.shape[1]
         if y is not None:
@@ -384,7 +379,7 @@ class LSTMCNNClassifier(KerasClassifier):
         opt = ipt
 
         # Embedding layer (Extracts embedding from embedding matrix according to input index sequence)
-        e0 = Embedding(self.vocab_size_, self.weight_mat.shape[1], weights=[self.weight_mat],
+        e0 = Embedding(self._vocab_size, self.weight_mat.shape[1], weights=[self.weight_mat],
                        input_length=self.sequence_length_, trainable=self.trainable)
         opt = e0(opt)
 
