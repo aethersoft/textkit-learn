@@ -33,6 +33,8 @@ def get_weights(word_embedding=None, vocabulary=None, default=None):
     weight_mat = [np.zeros(dim)]
     word_idx = dict()
     for w in vocabulary:
+        if w in word_idx:
+            continue
         temp = word_embedding[w]
         if temp is None and isinstance(default, str):
             if 'random' == default.lower():

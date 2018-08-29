@@ -43,7 +43,7 @@ class EmbeddingTransformer(BaseEstimator, TransformerMixin):
         if self.output is None or self.output.startswith('seq'):
             if self.padding:
                 assert isinstance(self.padding, int), \
-                    'Invalid input for pad_sequence. Please provide an integer value for `pad_sequence` parameter.'
+                    'Invalid input for `padding`. Please provide an integer value for `padding` parameter.'
                 seq = sequence.pad_sequences(seq, maxlen=self.padding, truncating='post')
             return seq
         if self.output.startswith('avg'):
