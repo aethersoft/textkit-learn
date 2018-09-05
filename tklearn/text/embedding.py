@@ -118,6 +118,21 @@ def load_word2vec(data_file, binary=True, unicode_errors='ignore', verbose=False
     return WordEmbedding(w2v, w2v.vector_size)
 
 
+def load_fasttext(data_file, verbose=False):
+    """
+    Loads and returns load_fasttext
+    :param binary: a boolean indicating whether the data is in binary word2vec format.
+    :param unicode_errors: default 'ignore', a string suitable to be passed as the errors argument to the unicode()
+            (Python 2.x) or str() (Python 3.x) function.
+    :param data_file: path to word2vec file
+    :return: Binary Word2Vec
+    """
+    from gensim.models.wrappers import FastText
+
+    w2v = FastText.load_fasttext_format(data_file)
+    return WordEmbedding(w2v, w2v.vector_size)
+
+
 def load_glove(data_file):
     """
     Loads Glove vectors to {{ WordEmbedding }} structure
