@@ -28,13 +28,13 @@ def build_vocabulary(texts=None, tokenizer=None, preprocess=None, max_vocab=None
             return ts
     word_freq = Counter()
     tokenize = tokenizer.tokenize if hasattr(tokenizer, 'tokenize') else tokenizer
-    for x in tokenize(preprocess(texts)):
-        word_freq[x] += 1
+    for tokens in tokenize(preprocess(texts)):
+        for token in tokens:
+            word_freq[token] += 1
     if max_vocab is None:
         frq_words = word_freq.most_common()
     else:
         frq_words = word_freq.most_common(max_vocab - 1)
-    vocab = set()
-    for x, _ in frq_words:
-        vocab.update(x)
+    frq_words.sort()
+    vocab = set([w for w, _ in frq_words])
     return vocab
