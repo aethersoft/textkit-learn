@@ -4,7 +4,6 @@ from keras import Model, Input, Sequential
 from keras.engine import InputLayer
 from keras.layers import Embedding, Conv1D, GlobalMaxPooling1D, GlobalAveragePooling1D, \
     Dropout, LSTM, Dense, MaxPooling1D, AveragePooling1D
-from keras.utils import to_categorical
 from scipy.sparse import isspmatrix
 
 from tklearn.utils.collections import isiterable
@@ -55,8 +54,8 @@ class FNNRegressor(KerasRegressor):
 
 
 class CNNRegressor(KerasRegressor):
-    def __init__(self, filters=250, kernel_size=3, pooling='max', dropout=None, hidden_dims=None, trainable=False,
-                 batch_size=32, epochs=15, **kwargs):
+    def __init__(self, weight_mat=None, filters=250, kernel_size=3, pooling='max', dropout=None, hidden_dims=None,
+                 trainable=False, batch_size=32, epochs=15, **kwargs):
         """
         Initializes the classifier
 
@@ -76,6 +75,7 @@ class CNNRegressor(KerasRegressor):
         self.kernel_size = kernel_size
         self.hidden_dims = hidden_dims
         self.trainable = trainable
+        self.weight_mat = weight_mat
         self.initialize()
 
     def initialize(self):
@@ -85,15 +85,11 @@ class CNNRegressor(KerasRegressor):
             self.hidden_dims = list(self.hidden_dims)
         if not isiterable(self.kernel_size):
             self.kernel_size = [self.kernel_size]
+        self._vocab_size = len(self.weight_mat)
 
     def preprocess(self, X, y=None):
-        if not hasattr(self, 'embedding_matrix_'):
-            self.embedding_matrix_ = X['embedding_matrix']
-        if not hasattr(self, 'vocab_size_'):
-            self.vocab_size_ = self.embedding_matrix_.shape[0]
         if not hasattr(self, 'sequence_length_'):
-            self.sequence_length_ = X['tokens'].shape[1]
-        X = X['tokens']
+            self.sequence_length_ = X.shape[1]
         return X, y
 
     def build_model(self, X, y):
@@ -106,7 +102,7 @@ class CNNRegressor(KerasRegressor):
         opt = ipt
 
         # Embedding layer (Extracts embedding from embedding matrix according to input index sequence)
-        e0 = Embedding(self.vocab_size_, self.embedding_matrix_.shape[1], weights=[self.embedding_matrix_],
+        e0 = Embedding(self._vocab_size, self.weight_mat.shape[1], weights=[self.weight_mat],
                        input_length=self.sequence_length_, trainable=self.trainable)
         opt = e0(opt)
 
@@ -128,8 +124,11 @@ class CNNRegressor(KerasRegressor):
             opt = d0(opt)
 
         # Hidden layers
-        for dim in self.hidden_dims:
-            l0 = Dense(dim, activation='relu')
+        for idx, dim in enumerate(self.hidden_dims):
+            if len(self.hidden_dims) - 1 == idx:
+                l0 = Dense(dim, activation='relu', name='feature_layer')
+            else:
+                l0 = Dense(dim, activation='relu')
             opt = l0(opt)
 
         # Output layer with sigmoid activation:
@@ -143,11 +142,13 @@ class CNNRegressor(KerasRegressor):
 
 
 class LSTMRegressor(KerasRegressor):
-    def __init__(self, trainable=False, lstm_units=150, hidden_dims=None, batch_size=16, epochs=8, **kwargs):
+    def __init__(self, weight_mat=None, trainable=False, lstm_units=150, hidden_dims=None, batch_size=16, epochs=8,
+                 **kwargs):
         super(LSTMRegressor, self).__init__(batch_size, epochs)
         self.trainable = trainable
         self.hidden_dims = hidden_dims
         self.lstm_units = lstm_units
+        self.weight_mat = weight_mat
         self.initialize()
 
     def initialize(self):
@@ -155,16 +156,12 @@ class LSTMRegressor(KerasRegressor):
             self.hidden_dims = []
         else:
             self.hidden_dims = list(self.hidden_dims)
+        self._vocab_size = len(self.weight_mat)
 
     def preprocess(self, X, y=None):
-        tokens = X['tokens']
-        if not hasattr(self, 'embedding_matrix_'):
-            self.embedding_matrix_ = X['embedding_matrix']
         if not hasattr(self, 'sequence_length_'):
-            self.sequence_length_ = tokens.shape[1]
-        if not hasattr(self, 'vocab_size_'):
-            self.vocab_size_ = self.embedding_matrix_.shape[0]
-        return tokens, y
+            self.sequence_length_ = X.shape[1]
+        return X, y
 
     def build_model(self, X, y):
         """
@@ -175,9 +172,9 @@ class LSTMRegressor(KerasRegressor):
         model = Sequential()
 
         model.add(InputLayer(input_shape=(self.sequence_length_,), sparse=False, dtype='int32'))
-        model.add(Embedding(self.vocab_size_,
-                            self.embedding_matrix_.shape[1],
-                            weights=[self.embedding_matrix_],
+        model.add(Embedding(self._vocab_size,
+                            self.weight_mat.shape[1],
+                            weights=[self.weight_mat],
                             input_length=self.sequence_length_,
                             trainable=self.trainable))
         # Add LSTM layer
@@ -202,8 +199,8 @@ class LSTMRegressor(KerasRegressor):
 
 
 class CNNLSTMRegressor(KerasRegressor):
-    def __init__(self, filters=250, kernel_size=3, pooling='max', dropout=None, lstm_units=300, pool_size=1,
-                 hidden_dims=None, trainable=False, batch_size=32, epochs=15, **kwargs):
+    def __init__(self, weight_mat=None, filters=250, kernel_size=3, pooling='max', dropout=None, lstm_units=300,
+                 pool_size=1, hidden_dims=None, trainable=False, batch_size=32, epochs=15, **kwargs):
         """
         Initializes the classifier
 
@@ -226,6 +223,7 @@ class CNNLSTMRegressor(KerasRegressor):
         self.kernel_size = kernel_size
         self.hidden_dims = hidden_dims
         self.trainable = trainable
+        self.weight_mat = weight_mat
         self.initialize()
 
     def initialize(self):
@@ -235,15 +233,11 @@ class CNNLSTMRegressor(KerasRegressor):
             self.hidden_dims = list(self.hidden_dims)
         if not isiterable(self.kernel_size):
             self.kernel_size = [self.kernel_size]
+        self._vocab_size = len(self.weight_mat)
 
     def preprocess(self, X, y=None):
-        if not hasattr(self, 'embedding_matrix_'):
-            self.embedding_matrix_ = X['embedding_matrix']
-        if not hasattr(self, 'vocab_size_'):
-            self.vocab_size_ = self.embedding_matrix_.shape[0]
         if not hasattr(self, 'sequence_length_'):
-            self.sequence_length_ = X['tokens'].shape[1]
-        X = X['tokens']
+            self.sequence_length_ = X.shape[1]
         return X, y
 
     def build_model(self, X, y):
@@ -256,7 +250,7 @@ class CNNLSTMRegressor(KerasRegressor):
         opt = ipt
 
         # Embedding layer (Extracts embedding from embedding matrix according to input index sequence)
-        e0 = Embedding(self.vocab_size_, self.embedding_matrix_.shape[1], weights=[self.embedding_matrix_],
+        e0 = Embedding(self._vocab_size, self.weight_mat.shape[1], weights=[self.weight_mat],
                        input_length=self.sequence_length_, trainable=self.trainable)
         opt = e0(opt)
 
@@ -292,13 +286,13 @@ class CNNLSTMRegressor(KerasRegressor):
         model = Model(inputs=ipt, outputs=opt)
 
         # Compile
-        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+        model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['mae'])
         return model
 
 
 class LSTMCNNRegressor(KerasRegressor):
-    def __init__(self, filters=250, kernel_size=3, pooling='max', dropout=None, lstm_units=300, hidden_dims=None,
-                 trainable=False, batch_size=32, epochs=15, **kwargs):
+    def __init__(self, weight_mat=None, filters=250, kernel_size=3, pooling='max', dropout=None, lstm_units=300,
+                 hidden_dims=None, trainable=False, batch_size=32, epochs=15, **kwargs):
         """
         Initializes the classifier
 
@@ -320,6 +314,7 @@ class LSTMCNNRegressor(KerasRegressor):
         self.kernel_size = kernel_size
         self.hidden_dims = hidden_dims
         self.trainable = trainable
+        self.weight_mat = weight_mat
         self.initialize()
 
     def initialize(self):
@@ -329,19 +324,11 @@ class LSTMCNNRegressor(KerasRegressor):
             self.hidden_dims = list(self.hidden_dims)
         if not isiterable(self.kernel_size):
             self.kernel_size = [self.kernel_size]
+        self._vocab_size = len(self.weight_mat)
 
     def preprocess(self, X, y=None):
-        if not hasattr(self, 'embedding_matrix_'):
-            self.embedding_matrix_ = X['embedding_matrix']
-        if not hasattr(self, 'vocab_size_'):
-            self.vocab_size_ = self.embedding_matrix_.shape[0]
         if not hasattr(self, 'sequence_length_'):
-            self.sequence_length_ = X['tokens'].shape[1]
-        if not hasattr(self, 'num_categories_'):
-            self.num_categories_ = len(np.unique(y))
-        if y is not None:
-            y = to_categorical(y)
-        X = X['tokens']
+            self.sequence_length_ = X.shape[1]
         return X, y
 
     def build_model(self, X, y):
@@ -354,7 +341,7 @@ class LSTMCNNRegressor(KerasRegressor):
         opt = ipt
 
         # Embedding layer (Extracts embedding from embedding matrix according to input index sequence)
-        e0 = Embedding(self.vocab_size_, self.embedding_matrix_.shape[1], weights=[self.embedding_matrix_],
+        e0 = Embedding(self._vocab_size, self.weight_mat.shape[1], weights=[self.weight_mat],
                        input_length=self.sequence_length_, trainable=self.trainable)
         opt = e0(opt)
 
@@ -389,5 +376,5 @@ class LSTMCNNRegressor(KerasRegressor):
         model = Model(inputs=ipt, outputs=opt)
 
         # Compile
-        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+        model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['mae'])
         return model
