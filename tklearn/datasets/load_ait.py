@@ -18,8 +18,8 @@ def _file_paths(base_dir, task):
                 'sadness': os.path.join(base_dir, 'EI-oc-En', 'train', 'EI-oc-En-sadness-train.txt'),
             },
             'dev': {
-                'anger': os.path.join(base_dir, 'EI-oc-En''dev', '2018-EI-oc-En-anger-dev.txt'),
-                'fear': os.path.join(base_dir, 'EI-oc-En''dev', '2018-EI-oc-En-fear-dev.txt'),
+                'anger': os.path.join(base_dir, 'EI-oc-En', 'dev', '2018-EI-oc-En-anger-dev.txt'),
+                'fear': os.path.join(base_dir, 'EI-oc-En', 'dev', '2018-EI-oc-En-fear-dev.txt'),
                 'joy': os.path.join(base_dir, 'EI-oc-En', 'dev', '2018-EI-oc-En-joy-dev.txt'),
                 'sadness': os.path.join(base_dir, 'EI-oc-En', 'dev', '2018-EI-oc-En-sadness-dev.txt'),
             },
