@@ -56,8 +56,8 @@ class KerasClassifier(ABC, BaseEstimator, ClassifierMixin):
         validation_split = 0.0
         if hasattr(self, '_validation_split'):
             validation_split = self._validation_split
-        self.model_.fit(X, y, batch_size=self.batch_size, epochs=self.epochs, callbacks=callbacks,
-                        validation_split=validation_split)
+        self.history_ = self.model_.fit(X, y, batch_size=self.batch_size, epochs=self.epochs, callbacks=callbacks,
+                                        validation_split=validation_split)
         return self
 
     def predict(self, X):
@@ -250,8 +250,8 @@ class KerasRegressor(ABC, BaseEstimator, RegressorMixin):
             callbacks.append(ValidationLogger(self._validation_data, self._validation_scorer))
         if len(callbacks) == 0:
             callbacks = None
-        self.model_.fit(X, y, batch_size=self.batch_size, epochs=self.epochs, callbacks=callbacks,
-                        validation_split=validation_split)
+        self.history_ = self.model_.fit(X, y, batch_size=self.batch_size, epochs=self.epochs, callbacks=callbacks,
+                                        validation_split=validation_split)
         return self
 
     def predict(self, X):

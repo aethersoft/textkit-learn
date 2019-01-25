@@ -11,7 +11,7 @@ from .base import KerasRegressor
 
 
 class FNNRegressor(KerasRegressor):
-    def __init__(self, hidden_dims=None, batch_size=16, epochs=8, **kwargs):
+    def __init__(self, hidden_dims=None, batch_size=16, epochs=8):
         super(FNNRegressor, self).__init__(batch_size, epochs)
         if hidden_dims is None:
             hidden_dims = []
@@ -55,7 +55,7 @@ class FNNRegressor(KerasRegressor):
 
 class CNNRegressor(KerasRegressor):
     def __init__(self, weight_mat=None, filters=250, kernel_size=3, pooling='max', dropout=None, hidden_dims=None,
-                 trainable=False, batch_size=32, epochs=15, **kwargs):
+                 trainable=False, batch_size=32, epochs=15):
         """
         Initializes the classifier
 
@@ -142,8 +142,7 @@ class CNNRegressor(KerasRegressor):
 
 
 class LSTMRegressor(KerasRegressor):
-    def __init__(self, weight_mat=None, trainable=False, lstm_units=150, hidden_dims=None, batch_size=16, epochs=8,
-                 **kwargs):
+    def __init__(self, weight_mat=None, trainable=False, lstm_units=150, hidden_dims=None, batch_size=16, epochs=8):
         super(LSTMRegressor, self).__init__(batch_size, epochs)
         self.trainable = trainable
         self.hidden_dims = hidden_dims
@@ -200,7 +199,7 @@ class LSTMRegressor(KerasRegressor):
 
 class CNNLSTMRegressor(KerasRegressor):
     def __init__(self, weight_mat=None, filters=250, kernel_size=3, pooling='max', dropout=None, lstm_units=300,
-                 pool_size=1, hidden_dims=None, trainable=False, batch_size=32, epochs=15, **kwargs):
+                 pool_size=1, hidden_dims=None, trainable=False, batch_size=32, epochs=15):
         """
         Initializes the classifier
 
@@ -292,7 +291,7 @@ class CNNLSTMRegressor(KerasRegressor):
 
 class LSTMCNNRegressor(KerasRegressor):
     def __init__(self, weight_mat=None, filters=250, kernel_size=3, pooling='max', dropout=None, lstm_units=300,
-                 hidden_dims=None, trainable=False, batch_size=32, epochs=15, **kwargs):
+                 hidden_dims=None, trainable=False, batch_size=32, epochs=15):
         """
         Initializes the classifier
 

@@ -12,7 +12,7 @@ from .base import KerasClassifier
 
 
 class FNNClassifier(KerasClassifier):
-    def __init__(self, hidden_dims=None, batch_size=16, epochs=8, **kwargs):
+    def __init__(self, hidden_dims=None, batch_size=16, epochs=8):
         super(FNNClassifier, self).__init__(batch_size, epochs)
         if hidden_dims is None:
             hidden_dims = []
@@ -64,8 +64,7 @@ class FNNClassifier(KerasClassifier):
 
 class CNNClassifier(KerasClassifier):
     def __init__(self, weight_mat=None, filters=250, kernel_size=3, pooling='max', dropout=None, hidden_dims=None,
-                 trainable=False,
-                 batch_size=32, epochs=15, **kwargs):
+                 trainable=False, batch_size=32, epochs=15):
         """
         Initializes the classifier
 
@@ -159,8 +158,7 @@ class CNNClassifier(KerasClassifier):
 
 
 class LSTMClassifier(KerasClassifier):
-    def __init__(self, weight_mat=None, trainable=False, lstm_units=150, hidden_dims=None, batch_size=16, epochs=8,
-                 **kwargs):
+    def __init__(self, weight_mat=None, trainable=False, lstm_units=150, hidden_dims=None, batch_size=16, epochs=8):
         super(LSTMClassifier, self).__init__(batch_size, epochs)
         self.trainable = trainable
         self.hidden_dims = hidden_dims
@@ -224,7 +222,7 @@ class LSTMClassifier(KerasClassifier):
 
 class CNNLSTMClassifier(KerasClassifier):
     def __init__(self, weight_mat=None, filters=250, kernel_size=3, pooling='max', dropout=None, lstm_units=300,
-                 pool_size=1, hidden_dims=None, trainable=False, batch_size=32, epochs=15, **kwargs):
+                 pool_size=1, hidden_dims=None, trainable=False, batch_size=32, epochs=15):
         """
         Initializes the classifier
 
@@ -323,7 +321,7 @@ class CNNLSTMClassifier(KerasClassifier):
 
 class LSTMCNNClassifier(KerasClassifier):
     def __init__(self, weight_mat=None, filters=250, kernel_size=3, pooling='max', dropout=None, lstm_units=300,
-                 hidden_dims=None, trainable=False, batch_size=32, epochs=15, **kwargs):
+                 hidden_dims=None, trainable=False, batch_size=32, epochs=15):
         """
         Initializes the classifier
 

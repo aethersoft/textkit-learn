@@ -29,6 +29,9 @@ def get_weights(word_embedding=None, vocabulary=None, default=None):
         word_embedding = WordEmbedding({}, 0)
     if vocabulary is None:
         vocabulary = set()
+    ridx, s = 0, None
+    if 'random' == default.lower():
+        s = np.random.normal(0, 0.1, (len(vocabulary), word_embedding.vector_size))
     dim = word_embedding.vector_size
     weight_mat = [np.zeros(dim)]
     word_idx = dict()
@@ -38,7 +41,7 @@ def get_weights(word_embedding=None, vocabulary=None, default=None):
         temp = word_embedding[w]
         if temp is None and isinstance(default, str):
             if 'random' == default.lower():
-                temp = np.random.rand(dim)
+                temp = s[ridx]
             elif 'zero' == default.lower():
                 temp = np.zeros(dim)
         if temp is not None:

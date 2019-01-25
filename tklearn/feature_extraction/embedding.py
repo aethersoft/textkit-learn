@@ -5,8 +5,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 
 
 class EmbeddingTransformer(BaseEstimator, TransformerMixin):
-    def __init__(self, word_index=None, tokenizer=None, preprocess=None, padding=0, output=None,
-                 weight_mat=None, *args, **kwargs):
+    def __init__(self, word_index=None, tokenizer=None, preprocess=None, padding=0, output=None, weight_mat=None):
         self.word_index = word_index
         self.tokenizer = tokenizer
         self.preprocess = preprocess
