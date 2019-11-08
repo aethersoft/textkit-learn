@@ -11,10 +11,10 @@ __all__ = [
 ]
 
 
-def mean_embedding(word_embedding: WordEmbedding) -> FunctionTransformer:
+def mean_embedding(weights: WordEmbedding) -> FunctionTransformer:
     """ Builds and returns Mean Embedding Transformer
 
-    :param word_embedding: WordEmbedding
+    :param weights: WordEmbedding
     :return: Mean Embedding Transformer
     """
 
@@ -23,10 +23,10 @@ def mean_embedding(word_embedding: WordEmbedding) -> FunctionTransformer:
         for tokens in X:
             words = []
             for token in tokens:
-                if token in word_embedding.vocab:
-                    words.append(word_embedding.word_vec(token))
+                if token in weights.vocab:
+                    words.append(weights.word_vec(token))
             if len(words) == 0:
-                mean_vec = np.zeros((word_embedding.dim,))
+                mean_vec = np.zeros((weights.dim,))
             else:
                 mean_vec = np.mean(words, axis=0)
             lst.append(mean_vec)
