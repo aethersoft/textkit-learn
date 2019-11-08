@@ -8,9 +8,9 @@ from os import makedirs
 from os.path import exists, expanduser, join
 
 import pandas as pd
+from tklearn.configs import configs
 
 from tklearn import utils
-from tklearn.configs import configs
 
 __all__ = [
     'get_data_home',
