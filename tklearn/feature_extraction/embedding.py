@@ -23,8 +23,10 @@ def mean_embedding(weights: WordEmbedding) -> FunctionTransformer:
         for tokens in X:
             words = []
             for token in tokens:
-                if token in weights.vocab:
+                try:
                     words.append(weights.word_vec(token))
+                except KeyError as _:
+                    pass
             if len(words) == 0:
                 mean_vec = np.zeros((weights.dim,))
             else:
