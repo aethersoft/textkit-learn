@@ -1,5 +1,9 @@
 import re
+import string
 from typing import Text, List
+from xml.sax import saxutils
+
+import emoji
 
 __all__ = ['TweetPreprocessor']
 
@@ -38,6 +42,7 @@ class TweetPreprocessor:
         :param s: Input Tweet text.
         :return: Preprocessed tweet.
         """
+        s = self._clean_tweet(s)
         if 'link' in self.normalize:
             for link in self.get_links(s):
                 s = s.replace(link, '<link>')
@@ -59,3 +64,17 @@ class TweetPreprocessor:
                 for n in ns[1]:
                     tokens = self._replace(tokens, n, ns[0])
         return ' '.join(tokens)
+
+    @staticmethod
+    def _clean_tweet(x):
+        """ Cleans a given text (tweet) while keeping important characters.
+
+        :param x: Input String.
+        :return: Cleaned Text.
+        """
+        x = saxutils.unescape(x)
+        x = x.replace('\xa0', ' ')
+        x = emoji.demojize(x)
+        x = ''.join(filter(lambda x: x in set(string.printable), x))
+        x = emoji.emojize(x)
+        return x
