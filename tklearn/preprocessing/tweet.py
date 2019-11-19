@@ -1,12 +1,10 @@
 import re
 from typing import Text, List
 
-from tklearn.preprocessing import TextPreprocessor
-
 __all__ = ['TweetPreprocessor']
 
 
-class TweetPreprocessor(TextPreprocessor):
+class TweetPreprocessor:
     """Preprocessor for Tweets.
 
     Instance of this class can be used to create a preprocessor for tour tweet data.
@@ -24,7 +22,7 @@ class TweetPreprocessor(TextPreprocessor):
 
     @staticmethod
     def get_mentions(s: Text) -> List[Text]:
-        return re.findall("(@[a-zA-Z0-9]{1,15})", s)
+        return re.findall("(@[a-zA-Z0-9_]{1,15})", s)
 
     @staticmethod
     def get_hashtags(s: Text) -> List[Text]:
