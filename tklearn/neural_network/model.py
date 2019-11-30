@@ -96,39 +96,44 @@ class AttentionNet(nn.Module):
         self.hidden_size = kwargs['hidden_size']
         self.output_size = kwargs['output_size']
         # Layer Configs
-        self.word_embeddings = nn.Embedding(self.vocab_size, self.word_dim)
-        self.word_embeddings.weight.data.copy_(torch.from_numpy(self.wv_matrix))
-        self.word_embeddings.weight.requires_grad = True
-        self.lstm = nn.LSTM(self.word_dim, self.hidden_size)
+        self.embedding = nn.Embedding(self.vocab_size, self.word_dim)
+        self.embedding.weight.data.copy_(torch.from_numpy(self.wv_matrix))
+        self.embedding.weight.requires_grad = True
+        self.lstm = nn.LSTM(self.word_dim, self.hidden_size, dropout=0.5)
         self.dropout = nn.Dropout(0.5)
         self.label = nn.Linear(self.hidden_size, self.output_size)
 
     def forward(self, text):
         batch_size, _ = text.shape
-        x = self.word_embeddings(text)
+        x = self.embedding(text)
         x = x.permute(1, 0, 2)
         h_0 = Variable(torch.zeros(1, batch_size, self.hidden_size).cuda())
         c_0 = Variable(torch.zeros(1, batch_size, self.hidden_size).cuda())
-        # final_hidden_state.size() = (1, batch_size, hidden_size)
-        output, (final_hidden_state, final_cell_state) = self.lstm(x, (h_0, c_0))
-        output = output.permute(1, 0, 2)  # output.size() = (batch_size, num_seq, hidden_size)
-        attn_output = AttentionNet.attention(output, final_hidden_state)
+        output, (h_n, c_n) = self.lstm(x, (h_0, c_0))
+        # output.size() = (seq_len, batch_size, hidden_size)
+        # h_n.size() = (1, batch_size, hidden_size)
+        output = output.permute(1, 0, 2)
+        # output.size() = (batch_size, seq_len, hidden_size)
+        attn_output = AttentionNet.attention(output, h_n)
+        # attn_output.size() = (batch_size, hidden_size)
         attn_output = self.dropout(attn_output)
         logits = self.label(attn_output)
         return logits
 
     @classmethod
-    def attention(cls, layer_input, final_state):
+    def attention(cls, hidden_state, final_state):
         """Self attention on 
         
-        :param layer_input:
-            Input of the layer
+        :param hidden_state:
+            Tensor of shape (batch_size, seq_len, hidden_size)
+             containing the output features (h_t) from the last layer of the LSTM, for each t.
         :param final_state:
-
+            Tensor of shape (1, batch_size, hidden_size)
+             containing the hidden state for t = seq_len.
         :return: 
         """
-        hidden = final_state.squeeze(0)
-        attn_weights = torch.bmm(layer_input, hidden.unsqueeze(2)).squeeze(2)
+        attn_weights = torch.bmm(hidden_state, final_state.squeeze(0).unsqueeze(2)).squeeze(2)
+        # attn_weights.shape() = (batch_size, seq_len)
         soft_attn_weights = F.softmax(attn_weights, 1)
-        new_hidden_state = torch.bmm(layer_input.transpose(1, 2), soft_attn_weights.unsqueeze(2)).squeeze(2)
-        return new_hidden_state
+        hidden_state = torch.bmm(hidden_state.transpose(1, 2), soft_attn_weights.unsqueeze(2)).squeeze(2)
+        return hidden_state
