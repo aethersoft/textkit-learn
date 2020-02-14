@@ -81,6 +81,11 @@ def download_data():
     url = 'https://www.dropbox.com/s/l20ydu0mvf38hlv/all_frames_hatespeechtwitter.pickle?dl=1'
     file_name = 'founta_frame_data.pickle'
     utils.download(url, data_home, file_name)
+    # ownload data for of Hate Speech (OLIDv1.0-dataset) dataset.
+    data_home = join(get_data_home(), 'olid_v1.0')
+    url = 'https://sites.google.com/site/offensevalsharedtask/olid/OLIDv1.0.zip?attredirects=0&d=1'
+    file_name = 'OLIDv1.0.zip'
+    utils.download(url, data_home, file_name, unzip=True)
 
 
 def _load_file(module_path, data_file_name):
