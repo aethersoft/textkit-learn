@@ -18,6 +18,7 @@ __all__ = [
     'download_data',
     'load_dwmw17',
     'load_fdcl18',
+    'load_olid',
     'load_dataset',
 ]
 
@@ -98,6 +99,8 @@ def _load_file(module_path, data_file_name):
     """
     if data_file_name.endswith('.csv'):
         return pd.read_csv(join(module_path, data_file_name))
+    if data_file_name.endswith('.tsv'):
+        return pd.read_csv(join(module_path, data_file_name), sep='\t')
     if data_file_name.endswith('.xlsx'):
         return pd.read_excel(join(module_path, data_file_name))
     if data_file_name.endswith('.json'):
@@ -172,6 +175,12 @@ def load_fdcl18(**kwargs):
     return df
 
 
+def load_olid(version=1.0, task='subtask_a'):
+    data_home = join(get_data_home(), 'olid_v%1.1f' % version)
+    ds = _load_file(data_home, 'olid-training-v1.0.tsv')
+    return ds.loc[:, ['id', 'tweet', task]]
+
+
 def load_dataset(name, **kwargs):
     """Loads and returns the dataset with the provided name.
 
@@ -179,8 +188,12 @@ def load_dataset(name, **kwargs):
     :param kwargs: Configurations for loading dataset.
     :return: Pandas.DataFrame containing features.
     """
-    if name.lower().startswith('f'):
+    if name.lower().startswith('fdcl18'):
         df = load_fdcl18(**kwargs)
-    else:
+    elif name.lower().startswith('dwmw17'):
         df = load_dwmw17(**kwargs)
+    elif name.lower().startswith('olid'):
+        df = load_olid(**kwargs)
+    else:
+        raise ValueError('Invalid dataset name. Please enter valid name.')
     return df
