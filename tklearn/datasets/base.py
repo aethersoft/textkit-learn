@@ -89,7 +89,7 @@ def download_data():
     utils.download(url, data_home, file_name, unzip=True)
 
 
-def _load_file(module_path, data_file_name):
+def _load_file(module_path, data_file_name, column_names=None):
     """Loads data from module_path/data/data_file_name.
 
     :param module_path: The module path.
@@ -98,9 +98,9 @@ def _load_file(module_path, data_file_name):
     :return: Pandas.DataFrame containing data.
     """
     if data_file_name.endswith('.csv'):
-        return pd.read_csv(join(module_path, data_file_name))
+        return pd.read_csv(join(module_path, data_file_name), names=column_names)
     if data_file_name.endswith('.tsv'):
-        return pd.read_csv(join(module_path, data_file_name), sep='\t')
+        return pd.read_csv(join(module_path, data_file_name), sep='\t', names=column_names)
     if data_file_name.endswith('.xlsx'):
         return pd.read_excel(join(module_path, data_file_name))
     if data_file_name.endswith('.json'):
@@ -175,10 +175,28 @@ def load_fdcl18(**kwargs):
     return df
 
 
-def load_olid(version=1.0, task='subtask_a'):
+def load_olid(version=1.0, task='subtask_a', split='train'):
     data_home = join(get_data_home(), 'olid_v%1.1f' % version)
-    ds = _load_file(data_home, 'olid-training-v1.0.tsv')
-    return ds.loc[:, ['id', 'tweet', task]]
+    if split == 'train':
+        ds = _load_file(data_home, 'olid-training-v1.0.tsv')
+        return ds.loc[:, ['id', 'tweet', task]]
+    elif split == 'test':
+        if task == 'subtask_a':
+            tweets = _load_file(data_home, 'testset-levela.tsv')
+            labels = _load_file(data_home, 'labels-levela.csv', column_names=['id', 'subtask_a'])
+            df = tweets.merge(labels, on='id')
+            return df
+        elif task == 'subtask_b':
+            tweets = _load_file(data_home, 'testset-levelb.tsv')
+            labels = _load_file(data_home, 'labels-levelb.csv', column_names=['id', 'subtask_b'])
+            df = tweets.merge(labels, on='id')
+            return df
+        elif task == 'subtask_c':
+            tweets = _load_file(data_home, 'testset-levelc.tsv')
+            labels = _load_file(data_home, 'labels-levelc.csv', column_names=['id', 'subtask_c'])
+            df = tweets.merge(labels, on='id')
+            return df
+    raise ValueError('Invalid parameters for OLIDv1.0 dataset loader. Please recheck the used parameters.')
 
 
 def load_dataset(name, **kwargs):
