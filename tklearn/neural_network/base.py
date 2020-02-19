@@ -2,15 +2,13 @@ import math
 
 import numpy as np
 import torch
+from sklearn import preprocessing
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils import shuffle, multiclass
 from tklearn import utils
 from tklearn.matrices.scorer import get_score_func
 
 logger = utils.get_logger(__name__)
-
-print('Name: {}'.format(__name__))
-logger.info('Logger is Working.')
 
 
 def get_criterion(criterion, *args, **kwargs):
@@ -60,11 +58,10 @@ def load_word_vector(word_embedding, vocab, idx_to_word):
 
 
 class NeuralNetClassifier(BaseEstimator, ClassifierMixin):
-    cuda_available = torch.cuda.is_available()
+    device = ('cpu', 'cuda')[torch.cuda.is_available()]
 
     def __init__(self, **kwargs):
-        if not self.cuda_available:
-            logger.warn('CUDA device not recognized.')
+        logger.debug('Using device %s for the model.' % self.device)
         # noinspection PyPep8Naming
         NeuralNetModule = kwargs['module']
         # Update Default Parameters from NN Module
@@ -95,38 +92,48 @@ class NeuralNetClassifier(BaseEstimator, ClassifierMixin):
         self.optimizer = kwargs['optimizer']
         # Construct Model
         self.model = NeuralNetModule(**kwargs)
-        if self.cuda_available:
-            logger.info('Found CUDA compatible device. CUDA support is enabled for Neural Network.')
-            self.model.cuda()
+        self._move_to_device(self.model)
         # Load metrics if available
         self.metrics = kwargs['metrics'] if 'metrics' in kwargs else list()
         self.logs = kwargs['logs'] if 'logs' in kwargs else dict()
         # Parameters assigned while fitting the model
-        self.classes_ = None
+        self.label_enc_ = None
         self.target_type_ = None
 
-    def fit(self, X, y=None, **kwargs):
+    def fit(self, X, y=None, validation_data=None, callbacks=None, **kwargs):
+        """ Fit Neural Network model.
+        Notes: Works for binary target only.
+
+        :param X: Training data
+        :param y: Target values
+        :param validation_data: Validation Data. Tuple containing validation features and target pairs
+        :param callbacks: Callbacks
+        :param kwargs: Other args (ignored)
+        :return: returns an instance of self.
+        """
         self.target_type_ = multiclass.type_of_target(y)
         self.logs['train_scores'] = []
         self.logs['valid_scores'] = []
-        self.classes_ = sorted(list(set(y)))
-        callbacks = kwargs['callbacks'] if 'callbacks' in kwargs else []
+        self.label_enc_ = preprocessing.LabelEncoder()
+        self.label_enc_.fit(y)
+        if callbacks is None:
+            callbacks = []
         # << Get validation data >>
         valid_x, valid_y = None, None
-        if 'validation_data' in kwargs and len(kwargs['validation_data']) > 1:
-            if len(kwargs['validation_data']) == 2:
-                valid_x, valid_y = kwargs['validation_data']
+        if validation_data is not None and len(validation_data) > 1:
+            if len(validation_data) == 2:
+                valid_x, valid_y = validation_data
             else:
-                valid_x, valid_y, val_sample_weights = kwargs['validation_data']
+                valid_x, valid_y, val_sample_weights = validation_data
         # # Convert to Variable & Move to GPU
+        valid_x_d = None
         if valid_x is not None:
             valid_x = [[self.word_to_idx[w] for w in sent][:self.max_sent_len] + [self.vocab_size + 1] * (
                     self.max_sent_len - len(sent)) for sent in valid_x]
             valid_x = torch.autograd.Variable(torch.LongTensor(valid_x))
-            if self.cuda_available:
-                valid_x = valid_x.cuda()
+            valid_x_d = self._move_to_device(valid_x)
         if valid_y is not None:
-            valid_y = [self.classes_.index(c) for c in valid_y]
+            valid_y = self.label_enc_.transform(valid_y)
         # << Get Validation Data / Done >>
         parameters = filter(lambda p: p.requires_grad, self.model.parameters())
         optimizer = get_optimizer(self.optimizer, parameters, self.learning_rate)
@@ -144,34 +151,31 @@ class NeuralNetClassifier(BaseEstimator, ClassifierMixin):
                     [self.word_to_idx[w] for w in sent][:self.max_sent_len] +
                     [self.vocab_size + 1] * (self.max_sent_len - len(sent)) for sent in train_x[i:i + batch_range]
                 ]
-                y_batch = [self.classes_.index(c) for c in train_y[i:i + batch_range]]
+                y_batch = self.label_enc_.transform(train_y[i:i + batch_range])
                 # # Input in torch.Variable
                 x_batch = torch.autograd.Variable(torch.LongTensor(x_batch))
+                x_batch_d = self._move_to_device(x_batch)
                 y_batch = torch.autograd.Variable(torch.LongTensor(y_batch))
-                # # Move to GPU
-                if self.cuda_available:
-                    x_batch, y_batch = x_batch.cuda(), y_batch.cuda()
+                y_batch_d = self._move_to_device(y_batch)
                 # # Back Propagation
                 optimizer.zero_grad()
                 self.model.train()
-                y_pred = self.model(x_batch)
-                loss = criterion(y_pred, y_batch)
+                y_pred_d = self.model(x_batch_d)
+                loss = criterion(y_pred_d, y_batch_d)
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(parameters, max_norm=self.norm_limit)
                 optimizer.step()
                 # # Calculate training & Validation scores
                 # # - Train accuracy is calculated for batch train set
-                y_pred = torch.softmax(y_pred, dim=1)
-                train_score = self._evaluate(y_batch.cpu().data.numpy(), y_pred.cpu().data.numpy())
+                y_pred_d = torch.softmax(y_pred_d, dim=1)
+                train_score = self._evaluate(y_batch, self._move_from_device(y_pred_d).data.numpy())
                 self.logs['train_scores'].append(train_score)
-                scores = 'Train: %s' % train_score
-                print(valid_x, valid_y)
-                if valid_x is not None and valid_y is not None:
-                    valid_pred = self.model(valid_x)
-                    valid_pred = torch.softmax(valid_pred, dim=1)
-                    valid_score = self._evaluate(valid_y, valid_pred.cpu().data.numpy())
+                scores = 'train_score: %s' % train_score
+                if valid_x_d is not None and valid_y is not None:
+                    valid_pred_d = torch.softmax(self.model(valid_x_d), dim=1)
+                    valid_score = self._evaluate(valid_y, self._move_from_device(valid_pred_d).data.numpy())
                     self.logs['valid_scores'].append(valid_score)
-                    scores = 'Train: %s\t | Valid: %s' % (train_score, valid_score)
+                    scores += '| validation_score: %s' % valid_score
                 # Show progress
                 temp = math.floor((i + self.batch_size) * 20 / len(train_x))
                 if temp != progress:
@@ -183,7 +187,7 @@ class NeuralNetClassifier(BaseEstimator, ClassifierMixin):
         return self
 
     def predict(self, X, y=None):
-        return np.argmax(self.predict_proba(X), axis=1)
+        return self.label_enc_.inverse_transform(np.argmax(self.predict_proba(X), axis=1))
 
     def predict_proba(self, X, y=None):
         self.model.eval()
@@ -191,10 +195,19 @@ class NeuralNetClassifier(BaseEstimator, ClassifierMixin):
         x = [[self.word_to_idx[w] if w in self.vocab else self.vocab_size for w in sent][:self.max_sent_len] +
              [self.vocab_size + 1] * (self.max_sent_len - len(sent)) for sent in X]
         x = torch.autograd.Variable(torch.LongTensor(x))
-        if self.cuda_available:  # Move to GPU
-            x = x.cuda()
+        x = self._move_to_device(x)
         # Predict Probabilities
-        return self.model(x).cpu().data.numpy()
+        return self._move_from_device(self.model(x)).data.numpy()
+
+    def _move_to_device(self, x):
+        if self.device == 'cuda':
+            return x.cuda()
+        return x
+
+    def _move_from_device(self, x):
+        if self.device == 'cuda':
+            return x.cpu()
+        return x
 
     def _evaluate(self, y_true, y_pred):
         y_pred = np.argmax(y_pred, axis=1)
