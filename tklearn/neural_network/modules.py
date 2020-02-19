@@ -20,7 +20,7 @@ class TextCNN(nn.Module):
         'filters': [3, 4, 5],
         'filter_num': 100,
         'dropout_prob': 0.5,
-        'wv_matrix': None,
+        'embedding_matrix': None,
     }
 
     def __init__(self, **kwargs):
@@ -29,7 +29,7 @@ class TextCNN(nn.Module):
         config = dict()
         for k, v in TextCNN.DEFAULT_CONFIG.items():
             config[k] = kwargs[k] if k in kwargs else v
-        # Hyperparameters
+        # Hyper-parameters
         self.model = config['model']
         self.max_sent_len = config['max_sent_len']
         self.word_dim = config['word_dim']
@@ -38,23 +38,23 @@ class TextCNN(nn.Module):
         self.filters = config['filters']
         self.filter_num = config['filter_num']
         self.dropout_prob = config['dropout_prob']
-        self.wv_matrix = config['wv_matrix']
+        self.embedding_matrix = config['embedding_matrix']
         self.return_layers = config['return_layers'] if 'return_layers' in kwargs else ['fc']
         self.in_channel = 1
-        # Validate Hyperparameters
+        # Validate Hyper-parameters
         assert (len(self.filters) == len(self.filter_num))
         if self.model != 'rand':
-            self.vocab_size = self.wv_matrix.shape[0] - 2
-            self.word_dim = self.wv_matrix.shape[1]
+            self.vocab_size = self.embedding_matrix.shape[0] - 2
+            self.word_dim = self.embedding_matrix.shape[1]
         # one for UNK and one for zero padding
         self.embedding = nn.Embedding(self.vocab_size + 2, self.word_dim, padding_idx=self.vocab_size + 1)
         if self.model != 'rand':
-            self.embedding.weight.data.copy_(torch.from_numpy(self.wv_matrix))
+            self.embedding.weight.data.copy_(torch.from_numpy(self.embedding_matrix))
             if self.model == 'static':
                 self.embedding.weight.requires_grad = False
             elif self.model == 'multichannel':
                 self.embedding2 = nn.Embedding(self.vocab_size + 2, self.word_dim, padding_idx=self.vocab_size + 1)
-                self.embedding2.weight.data.copy_(torch.from_numpy(self.wv_matrix))
+                self.embedding2.weight.data.copy_(torch.from_numpy(self.embedding_matrix))
                 self.embedding2.weight.requires_grad = False
                 self.in_channel = 2
         for i in range(len(self.filters)):
@@ -88,16 +88,16 @@ class AttentionNet(nn.Module):
     def __init__(self, **kwargs):
         super(AttentionNet, self).__init__()
         self.batch_size = kwargs['batch_size']
-        self.wv_matrix = kwargs['wv_matrix']
+        self.embedding_matrix = kwargs['embedding_matrix']
         # self.vocab_size = kwargs['vocab_size']
         # self.word_dim = kwargs['word_dim']
-        self.vocab_size = self.wv_matrix.shape[0]
-        self.word_dim = self.wv_matrix.shape[1]
+        self.vocab_size = self.embedding_matrix.shape[0]
+        self.word_dim = self.embedding_matrix.shape[1]
         self.hidden_size = kwargs['hidden_size']
         self.output_size = kwargs['output_size']
         # Layer Configs
         self.embedding = nn.Embedding(self.vocab_size, self.word_dim)
-        self.embedding.weight.data.copy_(torch.from_numpy(self.wv_matrix))
+        self.embedding.weight.data.copy_(torch.from_numpy(self.embedding_matrix))
         self.embedding.weight.requires_grad = True
         self.lstm = nn.LSTM(self.word_dim, self.hidden_size, dropout=0.5)
         self.dropout = nn.Dropout(0.5)

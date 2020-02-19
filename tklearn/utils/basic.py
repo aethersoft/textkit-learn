@@ -1,10 +1,10 @@
-import logging as _logging
+import logging as logging
+from logging import config as logging_conf
 import os
 import shutil
 import sys
 import time
 import zipfile
-from logging.config import dictConfig as configure
 from urllib import request
 
 import pandas as pd
@@ -17,9 +17,7 @@ __all__ = [
 def pprint(obj, **kwargs):
     """Pretty print the provided object.
 
-    :param flush: Whether to auto-flush after print.
     :param obj: Object to print.
-    :param type: Print type of object.
     :return: None
     """
     flush = kwargs['flush'] if 'flush' in kwargs else True
@@ -37,28 +35,28 @@ def pprint(obj, **kwargs):
         print(obj, flush=flush)
 
 
-_FORMAT = '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'
-
 _LOGGING_CONFIG = dict(
     version=1,
     formatters={
-        'f': {'format': _FORMAT}
+        'default_formatter': {'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'}
     },
     handlers={
-        'h': {'class': 'logging.StreamHandler',
-              'formatter': 'f',
-              'level': _logging.DEBUG}
+        'h': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'default_formatter',
+            'level': logging.DEBUG
+        }
     },
     root={
         'handlers': ['h'],
-        'level': _logging.DEBUG,
+        'level': logging.DEBUG,
     },
 )
 
 
 def get_logger(name):
-    configure(_LOGGING_CONFIG)
-    return _logging.getLogger(name)
+    logging_conf.dictConfig(_LOGGING_CONFIG)
+    return logging.getLogger(name)
 
 
 class ReportHook:
