@@ -7,6 +7,7 @@ from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils import shuffle, multiclass
 from tklearn import utils
 from tklearn.matrices.scorer import get_score_func
+from tklearn.neural_network.utils import move_to_device, move_from_device
 
 logger = utils.get_logger(__name__)
 
@@ -83,16 +84,17 @@ class NeuralNetClassifier(BaseEstimator, ClassifierMixin):
         self.epoch = kwargs['epoch']
         self.batch_size = kwargs['batch_size']
         self.max_sent_len = kwargs['max_sent_len']
-        self.norm_limit = kwargs['norm_limit']
+        self.clip_value = kwargs['clip_value']
         if 'criterion' not in kwargs:
             kwargs['criterion'] = None
         self.criterion = kwargs['criterion']
         if 'optimizer' not in kwargs:
             kwargs['optimizer'] = None
         self.optimizer = kwargs['optimizer']
+        kwargs['device'] = self.device
         # Construct Model
         self.model = NeuralNetModule(**kwargs)
-        self._move_to_device(self.model)
+        move_to_device(self.device, self.model)
         # Load metrics if available
         self.metrics = kwargs['metrics'] if 'metrics' in kwargs else list()
         self.logs = kwargs['logs'] if 'logs' in kwargs else dict()
@@ -112,8 +114,7 @@ class NeuralNetClassifier(BaseEstimator, ClassifierMixin):
         :return: returns an instance of self.
         """
         self.target_type_ = multiclass.type_of_target(y)
-        self.logs['train_scores'] = []
-        self.logs['valid_scores'] = []
+        self.logs = []
         self.label_enc_ = preprocessing.LabelEncoder()
         self.label_enc_.fit(y)
         if callbacks is None:
@@ -131,7 +132,7 @@ class NeuralNetClassifier(BaseEstimator, ClassifierMixin):
             valid_x = [[self.word_to_idx[w] for w in sent][:self.max_sent_len] + [self.vocab_size + 1] * (
                     self.max_sent_len - len(sent)) for sent in valid_x]
             valid_x = torch.autograd.Variable(torch.LongTensor(valid_x))
-            valid_x_d = self._move_to_device(valid_x)
+            valid_x_d = move_to_device(self.device, valid_x)
         if valid_y is not None:
             valid_y = self.label_enc_.transform(valid_y)
         # << Get Validation Data / Done >>
@@ -143,7 +144,7 @@ class NeuralNetClassifier(BaseEstimator, ClassifierMixin):
             self._callback(callbacks, 'epoch_begin')
             progress = None
             train_x, train_y = shuffle(train_x, train_y)
-            for i in range(0, len(train_x), self.batch_size):
+            for batch, i in enumerate(range(0, len(train_x), self.batch_size)):
                 self._callback(callbacks, 'batch_begin')
                 batch_range = min(self.batch_size, len(train_x) - i)
                 # Input as Sequence (`|batch_x| == self.max_sent_len`)
@@ -154,27 +155,27 @@ class NeuralNetClassifier(BaseEstimator, ClassifierMixin):
                 y_batch = self.label_enc_.transform(train_y[i:i + batch_range])
                 # # Input in torch.Variable
                 x_batch = torch.autograd.Variable(torch.LongTensor(x_batch))
-                x_batch_d = self._move_to_device(x_batch)
+                x_batch_d = move_to_device(self.device, x_batch)
                 y_batch = torch.autograd.Variable(torch.LongTensor(y_batch))
-                y_batch_d = self._move_to_device(y_batch)
+                y_batch_d = move_to_device(self.device, y_batch)
                 # # Back Propagation
                 optimizer.zero_grad()
                 self.model.train()
                 y_pred_d = self.model(x_batch_d)
                 loss = criterion(y_pred_d, y_batch_d)
                 loss.backward()
-                torch.nn.utils.clip_grad_norm_(parameters, max_norm=self.norm_limit)
+                torch.nn.utils.clip_grad_norm_(parameters, max_norm=self.clip_value)
                 optimizer.step()
                 # # Calculate training & Validation scores
                 # # - Train accuracy is calculated for batch train set
                 y_pred_d = torch.softmax(y_pred_d, dim=1)
-                train_score = self._evaluate(y_batch, self._move_from_device(y_pred_d).data.numpy())
-                self.logs['train_scores'].append(train_score)
+                train_score = self._evaluate(y_batch, move_from_device(self.device, y_pred_d).data.numpy())
+                self.logs.append({'key': 'train_score', 'value': train_score, 'epoch': e, 'batch': batch})
                 scores = 'train_score: %s' % train_score
                 if valid_x_d is not None and valid_y is not None:
                     valid_pred_d = torch.softmax(self.model(valid_x_d), dim=1)
-                    valid_score = self._evaluate(valid_y, self._move_from_device(valid_pred_d).data.numpy())
-                    self.logs['valid_scores'].append(valid_score)
+                    valid_score = self._evaluate(valid_y, move_from_device(self.device, valid_pred_d).data.numpy())
+                    self.logs.append({'key': 'validate_score', 'value': valid_score, 'epoch': e, 'batch': batch})
                     scores += '| validation_score: %s' % valid_score
                 # Show progress
                 temp = math.floor((i + self.batch_size) * 20 / len(train_x))
@@ -195,19 +196,9 @@ class NeuralNetClassifier(BaseEstimator, ClassifierMixin):
         x = [[self.word_to_idx[w] if w in self.vocab else self.vocab_size for w in sent][:self.max_sent_len] +
              [self.vocab_size + 1] * (self.max_sent_len - len(sent)) for sent in X]
         x = torch.autograd.Variable(torch.LongTensor(x))
-        x = self._move_to_device(x)
+        x = move_to_device(self.device, x)
         # Predict Probabilities
-        return self._move_from_device(self.model(x)).data.numpy()
-
-    def _move_to_device(self, x):
-        if self.device == 'cuda':
-            return x.cuda()
-        return x
-
-    def _move_from_device(self, x):
-        if self.device == 'cuda':
-            return x.cpu()
-        return x
+        return move_from_device(self.device, self.model(x)).data.numpy()
 
     def _evaluate(self, y_true, y_pred):
         y_pred = np.argmax(y_pred, axis=1)

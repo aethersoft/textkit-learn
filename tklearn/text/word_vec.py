@@ -60,7 +60,7 @@ def load_word2vec(filename: Text = 'GoogleNews-vectors-negative300.bin.gz', path
     """
     return WordEmbedding(
         KeyedVectors.load_word2vec_format(
-            join(path, filename) if path else join(configs['OLANG_PATH'], 'resources', filename),
+            join(path, filename) if path else join(configs['RESOURCE_PATH'], 'resources', filename),
             binary=True
         )
     )
@@ -77,11 +77,11 @@ def load_numberbatch(filename: Text = 'numberbatch-17.06-mini.h5', path: Text = 
     """
     if filename.endswith('.h5'):
         return WordEmbedding(
-            pd.read_hdf(join(path, filename) if path else join(configs['OLANG_PATH'], 'resources', filename), ),
+            pd.read_hdf(join(path, filename) if path else join(configs['RESOURCE_PATH'], 'resources', filename), ),
             preprocessor=_numberbatch.standardized_uri
         )
     return WordEmbedding(KeyedVectors.load_word2vec_format(
-        join(path, filename) if path else join(configs['OLANG_PATH'], 'resources', filename),
+        join(path, filename) if path else join(configs['RESOURCE_PATH'], 'resources', filename),
         binary=False
     ))
 

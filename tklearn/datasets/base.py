@@ -42,7 +42,7 @@ def get_data_home(data_home=None):
     :return: The path to onling data dir.
     """
     if data_home is None:
-        data_home = join(configs['OLANG_PATH'], 'data')
+        data_home = join(configs['RESOURCE_PATH'], 'data')
     data_home = expanduser(data_home)
     if not exists(data_home):
         makedirs(data_home)

@@ -3,6 +3,8 @@ import torch.nn as nn
 from torch.autograd import Variable
 from torch.nn import functional as F
 
+from tklearn.neural_network import move_to_device
+
 
 class TextCNN(nn.Module):
     """Multichannel Convolutional Neural Network for Text Data.
@@ -40,6 +42,7 @@ class TextCNN(nn.Module):
         self.dropout_prob = config['dropout_prob']
         self.embedding_matrix = config['embedding_matrix']
         self.return_layers = config['return_layers'] if 'return_layers' in kwargs else ['fc']
+        self.device = config['device']
         self.in_channel = 1
         # Validate Hyper-parameters
         assert (len(self.filters) == len(self.filter_num))
@@ -95,6 +98,7 @@ class AttentionNet(nn.Module):
         self.word_dim = self.embedding_matrix.shape[1]
         self.hidden_size = kwargs['hidden_size']
         self.output_size = kwargs['output_size']
+        self.device = kwargs['device']
         # Layer Configs
         self.embedding = nn.Embedding(self.vocab_size, self.word_dim)
         self.embedding.weight.data.copy_(torch.from_numpy(self.embedding_matrix))
@@ -107,8 +111,8 @@ class AttentionNet(nn.Module):
         batch_size, _ = text.shape
         x = self.embedding(text)
         x = x.permute(1, 0, 2)
-        h_0 = Variable(torch.zeros(1, batch_size, self.hidden_size).cuda())
-        c_0 = Variable(torch.zeros(1, batch_size, self.hidden_size).cuda())
+        h_0 = Variable(move_to_device(self.device, torch.zeros(1, batch_size, self.hidden_size)))
+        c_0 = Variable(move_to_device(self.device, torch.zeros(1, batch_size, self.hidden_size)))
         output, (h_n, c_n) = self.lstm(x, (h_0, c_0))
         # output.size() = (seq_len, batch_size, hidden_size)
         # h_n.size() = (1, batch_size, hidden_size)

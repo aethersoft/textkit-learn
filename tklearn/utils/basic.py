@@ -35,27 +35,26 @@ def pprint(obj, **kwargs):
         print(obj, flush=flush)
 
 
-_LOGGING_CONFIG = dict(
-    version=1,
-    formatters={
-        'default_formatter': {'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'}
-    },
-    handlers={
-        'h': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'default_formatter',
-            'level': logging.DEBUG
+def get_logger(name, config=None):
+    if config is None:
+        config = {
+            'version': 1,
+            'formatters': {
+                'default_formatter': {'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'}
+            },
+            'handlers': {
+                'h': {
+                    'class': 'logging.StreamHandler',
+                    'formatter': 'default_formatter',
+                    'level': logging.DEBUG
+                }
+            },
+            'root': {
+                'handlers': ['h'],
+                'level': logging.DEBUG,
+            }
         }
-    },
-    root={
-        'handlers': ['h'],
-        'level': logging.DEBUG,
-    },
-)
-
-
-def get_logger(name):
-    logging_conf.dictConfig(_LOGGING_CONFIG)
+    logging_conf.dictConfig(config)
     return logging.getLogger(name)
 
 
