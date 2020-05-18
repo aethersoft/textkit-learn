@@ -23,6 +23,7 @@ class TextCNN(nn.Module):
         'filter_num': 100,
         'dropout_prob': 0.5,
         'embedding_matrix': None,
+        'device': 'gpu',
     }
 
     def __init__(self, **kwargs):
