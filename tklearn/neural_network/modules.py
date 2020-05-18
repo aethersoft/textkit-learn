@@ -13,20 +13,37 @@ class TextCNN(nn.Module):
     `Kim, Y. (2014). Convolutional neural networks for sentence classification. arXiv preprint arXiv:1408.5882.`
     """
 
+    DEFAULT_CONFIG = {
+        'model': 'rand',  # ['rand', 'static', 'non-static', 'multichannel']
+        'max_sent_len': 20,
+        'vocab_size': None,
+        'word_dim': None,
+        'class_size': 2,
+        'filters': [3, 4, 5],
+        'filter_num': 100,
+        'dropout_prob': 0.5,
+        'embedding_matrix': None,
+        'device': 'gpu',
+    }
+
     def __init__(self, **kwargs):
         super(TextCNN, self).__init__()
+        # Update Default Parameters
+        config = dict()
+        for k, v in TextCNN.DEFAULT_CONFIG.items():
+            config[k] = kwargs[k] if k in kwargs else v
         # Hyper-parameters
-        self.model = kwargs['model']
-        self.max_sent_len = kwargs['max_sent_len']
-        self.word_dim = kwargs['word_dim']
-        self.vocab_size = kwargs['vocab_size']
-        self.class_size = kwargs['class_size']
-        self.filters = kwargs['filters']
-        self.filter_num = kwargs['filter_num']
-        self.dropout_prob = kwargs['dropout_prob']
-        self.embedding_matrix = kwargs['embedding_matrix']
-        self.return_layers = kwargs['return_layers'] if 'return_layers' in kwargs else ['fc']
-        self.device = kwargs['device']
+        self.model = config['model']
+        self.max_sent_len = config['max_sent_len']
+        self.word_dim = config['word_dim']
+        self.vocab_size = config['vocab_size']
+        self.class_size = config['class_size']
+        self.filters = config['filters']
+        self.filter_num = config['filter_num']
+        self.dropout_prob = config['dropout_prob']
+        self.embedding_matrix = config['embedding_matrix']
+        self.return_layers = config['return_layers'] if 'return_layers' in kwargs else ['fc']
+        self.device = config['device']
         self.in_channel = 1
         # Validate Hyper-parameters
         assert (len(self.filters) == len(self.filter_num))
