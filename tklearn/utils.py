@@ -6,19 +6,40 @@ import sys
 import time
 import zipfile
 from urllib import request
+from pandas.io.json import json_normalize
 
 import pandas as pd
 
 __all__ = [
-    'pprint', 'get_logger', 'download'
+    'pprint', 'get_logger', 'download',
+    'dict_normalize', 'dict2string'
 ]
 
 
-def pprint(obj, **kwargs):
-    """Pretty print the provided object.
+def dict_normalize(d):
+    df = json_normalize(d, sep='.')
+    return df.to_dict(orient='records')[0]
 
-    :param obj: Object to print.
-    :return: None
+
+def dict2string(d):
+    output = ''
+    for k, v in d.items():
+        output += '{:<15}{:>15}\n'.format(k, v)
+    return output
+
+
+def pprint(obj, **kwargs):
+    """ Pretty print the provided object.
+
+    Parameters
+    ----------
+    obj
+        Object to print.
+    kwargs
+
+    Returns
+    -------
+        None
     """
     flush = kwargs['flush'] if 'flush' in kwargs else True
     if type(obj) == pd.DataFrame:
@@ -76,13 +97,22 @@ class ReportHook:
 
 
 def download(url, root, filename, unzip=False):
-    """Download file from a provided URL to '{root}/{filename}'.
+    """ Download file from a provided URL to '{root}/{filename}'.
 
-    :param url: URL to download the file from.
-    :param root: Root folder to save the file.
-    :param filename: Name of the file to be saved.
-    :param unzip: Whether to unzip the file.
-    :return: Nothing
+    Parameters
+    ----------
+    url
+        URL to download the file from.
+    root
+        Root folder to save the file.
+    filename
+        Name of the file to be saved.
+    unzip
+        Whether to unzip the file.
+
+    Returns
+    -------
+        Nothing
     """
     if unzip:
         file = os.path.join(root, os.path.splitext(filename)[0])
@@ -97,6 +127,7 @@ def download(url, root, filename, unzip=False):
     if not os.path.exists(root):
         os.makedirs(root)
     file = os.path.join(root, filename)
+    print(f'Downloading file with name {filename}')
     request.urlretrieve(url, file, ReportHook())
     if unzip:
         with zipfile.ZipFile(file, 'r') as zf:

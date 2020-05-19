@@ -1,23 +1,34 @@
 """ Implements Embedding Transformers.
 """
+from typing import Text
 
 import numpy as np
 from sklearn.preprocessing import FunctionTransformer
 
-from tklearn.text.word_vec import WordEmbedding
+from tklearn.preprocessing.embedding import WordEmbedding
 
 __all__ = [
-    'mean_embedding'
+    'make_embedding_transformer'
 ]
 
 
-def mean_embedding(weights: WordEmbedding) -> FunctionTransformer:
+def make_embedding_transformer(weights: WordEmbedding, method: Text = 'average') -> FunctionTransformer:
     """ Builds and returns Mean Embedding Transformer
 
-    :param weights: WordEmbedding
-    :return: Mean Embedding Transformer
+    Parameters
+    ----------
+    weights
+        WordEmbedding
+
+    method
+        Strategy to use to get embedding for sentences. Should be one of ['sum', 'average']
+
+    Returns
+    -------
+        Mean Embedding Transformer
     """
 
+    # noinspection PyPep8Naming
     def _transform(X, y=None):
         lst = []
         for tokens in X:
@@ -30,7 +41,10 @@ def mean_embedding(weights: WordEmbedding) -> FunctionTransformer:
             if len(words) == 0:
                 mean_vec = np.zeros((weights.dim,))
             else:
-                mean_vec = np.mean(words, axis=0)
+                if method == 'sum':
+                    mean_vec = np.sum(words, axis=0)
+                else:
+                    mean_vec = np.mean(words, axis=0)
             lst.append(mean_vec)
         return np.array(lst)
 

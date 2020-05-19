@@ -9,18 +9,27 @@ logger = utils.get_logger(__name__)
 
 __all__ = [
     'CrossValidator',
-    'train_dev_test_split'
 ]
 
 
+# noinspection PyPep8Naming
 class CrossValidator:
     def __init__(self, model, kwargs=None, n_splits=3, scoring=None):
-        """Initialize CrossValidator object.
+        """ Initialize CrossValidator object.
 
-        :param model: The model/estimator to validate.
-        :param kwargs: Parameters of model if not initialized.
-        :param n_splits: Number of splits.
-        :param scoring: Scoring functions.
+        Parameters
+        ----------
+        model
+            The model/estimator to validate.
+
+        kwargs
+            Parameters of model if not initialized.
+
+        n_splits
+            Number of splits.
+
+        scoring
+            Scoring functions.
         """
         self.model = model
         self.kwargs = kwargs
@@ -28,21 +37,44 @@ class CrossValidator:
         self.scoring = scoring if scoring is not None else []
 
     def cross_validate(self, X, y):
-        """Cross-validate input X, y.
+        """ Cross-validate input X, y.
 
-        :param X: Input features.
-        :param y: Input labels.
-        :return: Cross validation results of each split of each scorer.
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            The data to fit. Can be, for example a list, or an array at least 2d.
+
+        y : array-like of shape (n_samples,) or (n_samples, n_outputs), default=None
+            The target variable to try to predict in the case of supervised learning.
+
+        Returns
+        -------
+        cross_validation_scores
+            Cross validation results of each split of each scorer.
         """
         return self.cross_val_predict(X, y, return_scores=True)[1]
 
     def cross_val_predict(self, X, y, return_scores=False):
-        """Cross-validate input X, y.
+        """ Cross-validate input X, y.
 
-        :param X: Input features.
-        :param y: Input labels.
-        :param return_scores: Whether to return scoring values of each test-set.
-        :return: Cross validation results of each split of each scorer.
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            The data to fit. Can be, for example a list, or an array at least 2d.
+
+        y : array-like of shape (n_samples,) or (n_samples, n_outputs), default=None
+            The target variable to try to predict in the case of supervised learning.
+
+        return_scores : boolean
+            Whether to return scoring values of each test-set.
+
+        Returns
+        -------
+        cross_validation_scores
+            Cross validation results of each split of each scorer.
+
+        predictions
+            Cross validation predictions.
         """
         skf = StratifiedKFold(n_splits=self.n_splits)
         predictions = dict()
@@ -73,25 +105,3 @@ class CrossValidator:
             logger.info('Training Completed: %i of %i splits.' % (n, self.n_splits))
         predictions = pd.DataFrame.from_dict(predictions, orient='index')
         return (predictions, split_scores) if return_scores else predictions
-
-
-def train_dev_test_split(X, y, random_state=42):
-    """Split arrays or matrices into random train, dev and test subsets.
-
-    :param X: Input features.
-    :param y: Input labels.
-    :param random_state: Seed used by the random number generator.
-    :return: List containing train-test split of inputs.
-    """
-    # Set random_state to ensure the reproducibility of the samples
-    X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, test_size=0.3, random_state=random_state)
-    X_train, X_dev, y_train, y_dev = train_test_split(X_train, y_train, stratify=y_train, test_size=0.2,
-                                                      random_state=random_state)
-    # Reset index
-    X_train = X_train.reset_index(drop=True)
-    X_dev = X_dev.reset_index(drop=True)
-    X_test = X_test.reset_index(drop=True)
-    y_train = y_train.reset_index(drop=True)
-    y_dev = y_dev.reset_index(drop=True)
-    y_test = y_test.reset_index(drop=True)
-    return X_train, X_dev, X_test, y_train, y_dev, y_test

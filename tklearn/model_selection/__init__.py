@@ -1,1 +1,5 @@
-from ._split import *
+from ._validation import *
+
+__all__ = [
+    'CrossValidator',
+]

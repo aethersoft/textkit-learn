@@ -12,32 +12,38 @@ from sklearn.preprocessing import LabelBinarizer
 
 from tklearn.configs import configs
 
+# noinspection SpellCheckingInspection
 __all__ = [
-    'download_hatebase',
-    'load_hatebase',
-    'HatebaseVectorizer'
+    'download_hatebase', 'load_hatebase', 'HatebaseVectorizer'
 ]
 
 
+# noinspection SpellCheckingInspection
 def download_hatebase(resource_home=None):
-    """Downloads hatebase to the resource folder. Perquisite required: `hatebase`.
+    """ Downloads hatebase to the resource folder. Perquisite required: `hatebase`.
 
-    :return: Nothing
+    Parameters
+    ----------
+    resource_home
+
+    Returns
+    -------
+    null
+        Nothing
     """
-    HatebaseAPI = import_module('HatebaseAPI', 'hatebase')
+    hatebase_api = import_module('HatebaseAPI', 'hatebase')
     key = input('Please enter your api key for https://hatebase.org/: ')
-    hatebase = HatebaseAPI({"key": key})
+    hatebase = hatebase_api({"key": key})
     filters = {"language": "eng"}
-    format = "json"
     # initialize list for all vocabulary entry dictionaries
     en_vocab = {}
-    response = hatebase.getVocabulary(filters=filters, format=format)
+    response = hatebase.getVocabulary(filters=filters, format='json')
     pages = response["number_of_pages"]
     # fill the vocabulary list with all entries of all pages
     # this might take some time...
     for page in range(1, pages + 1):
         filters["page"] = str(page)
-        response = hatebase.getVocabulary(filters=filters, format=format)
+        response = hatebase.getVocabulary(filters=filters, format='json')
         result = response["result"]
         en_vocab[result['term']] = result
     # Save file in the path
@@ -49,6 +55,7 @@ def download_hatebase(resource_home=None):
         json.dump(en_vocab, json_file)
 
 
+# noinspection SpellCheckingInspection
 def load_hatebase(resource_home=None):
     if resource_home:
         resource_path = join(resource_home, 'hatebase_vocab_en.json')
@@ -59,6 +66,7 @@ def load_hatebase(resource_home=None):
     return en_vocab
 
 
+# noinspection SpellCheckingInspection,PyPep8Naming
 class HatebaseVectorizer(TransformerMixin, BaseEstimator):
     def __init__(self, features=None, tokenizer=None, resource_home=None):
         self.features = features
@@ -72,28 +80,52 @@ class HatebaseVectorizer(TransformerMixin, BaseEstimator):
         self.tokenize = self.tokenizer if self.tokenizer else self._whitespace_tokenize
 
     def fit(self, X, y=None, **kwargs):
-        """Included for compatibility with the interface of `TransformerMixin`.
+        """ Included for compatibility with the interface of `TransformerMixin`.
 
-        :param X: Input features.
-        :param y: Input labels.
-        :return: `self`.
+        Parameters
+        ----------
+        X
+            Input features.
+
+        y
+            Input labels.
+
+        kwargs
+
+        Returns
+        -------
+        self
+            `self`
         """
         return self
 
     def transform(self, X):
-        """Extract features from the input array-like.
+        """ Extract features from the input array-like.
 
-        :param X: An array-like of sentences to extract Hatebase features.
-        :return: Hatebase features.
+        Parameters
+        ----------
+        X
+            An array-like of sentences to extract Hatebase features.
+
+        Returns
+        -------
+            Hatebase features.
         """
         features = [self._extract_features(x) for x in X]
         return np.array(features)
 
     def _preprocess(self, text: Text) -> pd.Series:
-        """Preprocess and tokenize input text.
+        """ Preprocess and tokenize input text.
 
-        :param text: An input text.
-        :return: Preprocessed and tokenized sentences.
+        Parameters
+        ----------
+        text
+            Input text.
+
+        Returns
+        -------
+        tokens
+            Preprocessed and tokenized sentences.
         """
         for v in self.index:
             if '_' in v:
@@ -101,10 +133,16 @@ class HatebaseVectorizer(TransformerMixin, BaseEstimator):
         return pd.Series(self.tokenize(text))
 
     def _extract_features(self, text: Text) -> np.ndarray:
-        """Extracts features from Text input.
+        """ Extracts features from Text input.
 
-        :param text: Input text.
-        :return: `pandas.DataFrame` of Features.
+        Parameters
+        ----------
+        text
+            Input text.
+
+        Returns
+        -------
+            `pandas.DataFrame` of Features.
         """
         tokens = self._preprocess(text)
         feature_mtx = [np.zeros(self.dims)]
@@ -115,15 +153,33 @@ class HatebaseVectorizer(TransformerMixin, BaseEstimator):
 
     @classmethod
     def _whitespace_tokenize(cls, text):
-        """Default Tokenizer"""
+        """ Default Tokenizer
+
+        Parameters
+        ----------
+        text
+
+        Returns
+        -------
+
+        """
         return text.split(' ')
 
     @classmethod
     def _prepare_features(cls, dataset, features):
-        """Prepares features for each term
+        """ Prepares features for each term
 
-        :param dataset: Hatebase dataset.
-        :return: Feature-map, and word index mapping.
+        Parameters
+        ----------
+        dataset
+            Hatebase dataset.
+
+        features
+
+        Returns
+        -------
+        feature_map
+            Feature-map, and word index mapping.
         """
         index = {r['term'].replace(' ', '_'): r['vocabulary_id'] for _, r in dataset.items()}
         dataset = pd.DataFrame([v for (k, v) in dataset.items()], index=index)

@@ -43,8 +43,7 @@ def english_filter(tokens):
     """
     Given a list of tokens, remove a small list of English stopwords. This
     helps to work with previous versions of ConceptNet, which often provided
-    phrases such as 'an apple' and assumed they would be standardized to
-	'apple'.
+    phrases such as 'an apple' and assumed they would be standardized to 'apple'.
     """
     non_stopwords = [token for token in tokens if token not in STOPWORDS]
     while non_stopwords and non_stopwords[0] in DROP_FIRST:

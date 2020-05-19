@@ -9,14 +9,20 @@ __all__ = ['TweetPreprocessor']
 
 
 class TweetPreprocessor:
-    """Preprocessor for Tweets.
+    """ Preprocessor for Tweets.
 
     Instance of this class can be used to create a preprocessor for tour tweet data.
     Several options are provided and you might be using them according to your use case.
     """
 
     def __init__(self, **kwargs):
-        """Initialize `TweetPreprocessor` object."""
+        """ Initialize `TweetPreprocessor` object.
+
+        Parameters
+        ----------
+        kwargs
+            Parameters
+        """
         super(TweetPreprocessor, self).__init__()
         self.normalize = (kwargs['normalize'] if 'normalize' in kwargs else []) or []
 
@@ -37,10 +43,16 @@ class TweetPreprocessor:
         return [new if x == old else x for x in s if x.strip() != '']
 
     def preprocess(self, s: Text) -> Text:
-        """Preprocess the input text. Expected input is a Tweet text.
+        """ Preprocess the input text. Expected input is a Tweet text.
 
-        :param s: Input Tweet text.
-        :return: Preprocessed tweet.
+        Parameters
+        ----------
+        s
+            Input Tweet text.
+
+        Returns
+        -------
+            Preprocessed tweet.
         """
         s = self._clean_tweet(s)
         if 'link' in self.normalize:
@@ -69,8 +81,13 @@ class TweetPreprocessor:
     def _clean_tweet(x):
         """ Cleans a given text (tweet) while keeping important characters.
 
-        :param x: Input String.
-        :return: Cleaned Text.
+        Parameters
+        ----------
+        x
+            Input String.
+        Returns
+        -------
+            Cleaned Text.
         """
         x = saxutils.unescape(x)
         x = x.replace('\xa0', ' ')
