@@ -164,7 +164,7 @@ class NeuralNetClassifier(BaseEstimator, ClassifierMixin):
                 y_pred_d = self.model(x_batch_d)
                 loss = criterion(y_pred_d, y_batch_d)
                 loss.backward()
-                torch.nn.utils.clip_grad_norm_(parameters, max_norm=self.clip_value)
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.clip_value)
                 optimizer.step()
                 # # Calculate training & Validation scores
                 # # - Train accuracy is calculated for batch train set
