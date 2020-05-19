@@ -127,8 +127,9 @@ def download(url, root, filename, unzip=False):
     if not os.path.exists(root):
         os.makedirs(root)
     file = os.path.join(root, filename)
-    print(f'Downloading file with name {filename}')
+    print(f'Download Progress\t[{filename}]\t:', end='\t')
     request.urlretrieve(url, file, ReportHook())
+    print()
     if unzip:
         with zipfile.ZipFile(file, 'r') as zf:
             zf.extractall(root)
