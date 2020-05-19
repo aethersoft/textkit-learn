@@ -5,7 +5,7 @@ from typing import Text
 import numpy as np
 from sklearn.preprocessing import FunctionTransformer
 
-from tklearn.preprocessing.embedding import WordEmbedding
+from tklearn.embedding.loader import WordEmbedding
 
 __all__ = [
     'make_embedding_transformer'
