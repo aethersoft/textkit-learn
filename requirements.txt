@@ -7,3 +7,4 @@ gensim
 pandas
 h5py
 wordfreq
+hatebase

@@ -9,6 +9,7 @@ import pandas as pd
 from sklearn.base import TransformerMixin, BaseEstimator
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.preprocessing import LabelBinarizer
+from hatebase import HatebaseAPI
 
 from tklearn.configs import configs
 
@@ -31,9 +32,8 @@ def download_hatebase(resource_home=None):
     null
         Nothing
     """
-    hatebase_api = import_module('HatebaseAPI', 'hatebase')
     key = input('Please enter your api key for https://hatebase.org/: ')
-    hatebase = hatebase_api({"key": key})
+    hatebase = HatebaseAPI({"key": key})
     filters = {"language": "eng"}
     # initialize list for all vocabulary entry dictionaries
     en_vocab = {}
