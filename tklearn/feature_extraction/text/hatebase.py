@@ -1,4 +1,5 @@
 import json
+import os
 from builtins import classmethod
 from importlib import import_module
 from os.path import join
@@ -18,9 +19,11 @@ __all__ = [
     'download_hatebase', 'load_hatebase', 'HatebaseVectorizer'
 ]
 
-
 # noinspection SpellCheckingInspection
-def download_hatebase(resource_home=None):
+from tklearn.dataset import get_data_home
+
+
+def download_hatebase(token=None, resource_home=None):
     """ Downloads hatebase to the resource folder. Perquisite required: `hatebase`.
 
     Parameters
@@ -32,7 +35,10 @@ def download_hatebase(resource_home=None):
     null
         Nothing
     """
-    key = input('Please enter your api key for https://hatebase.org/: ')
+    if token is None:
+        key = input('Please enter your api key for https://hatebase.org/: ')
+    else:
+        key = token
     hatebase = HatebaseAPI({"key": key})
     filters = {"language": "eng"}
     # initialize list for all vocabulary entry dictionaries
@@ -44,13 +50,17 @@ def download_hatebase(resource_home=None):
     for page in range(1, pages + 1):
         filters["page"] = str(page)
         response = hatebase.getVocabulary(filters=filters, format='json')
-        result = response["result"]
-        en_vocab[result['term']] = result
+        results = response["result"]
+        for result in results:
+            en_vocab[result['term']] = result
     # Save file in the path
     if resource_home:
         resource_path = join(resource_home, 'hatebase_vocab_en.json')
     else:
-        resource_path = join(configs['OLANG_PATH'], 'resources', 'hatebase_vocab_en.json')
+        directory = join(get_data_home(), '..', 'resource')
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        resource_path = join(directory, 'hatebase_vocab_en.json')
     with open(resource_path, 'w', encoding='utf-8') as json_file:
         json.dump(en_vocab, json_file)
 
@@ -60,7 +70,7 @@ def load_hatebase(resource_home=None):
     if resource_home:
         resource_path = join(resource_home, 'hatebase_vocab_en.json')
     else:
-        resource_path = join(configs['OLANG_PATH'], 'resources', 'hatebase_vocab_en.json')
+        resource_path = join(get_data_home(), '..', 'resource', 'hatebase_vocab_en.json')
     with open(resource_path, 'r', encoding='utf-8') as json_file:
         en_vocab = json.load(json_file)
     return en_vocab
@@ -75,7 +85,8 @@ class HatebaseVectorizer(TransformerMixin, BaseEstimator):
         # Initialize
         if self.features is None:
             self.features = ['term']
-        self.feature_vectors, self.index = self._prepare_features(load_hatebase(self.resource_home), self.features)
+        self.hatebase = load_hatebase(self.resource_home)
+        self.feature_vectors, self.index = self._prepare_features(self.hatebase, self.features)
         self.dims = self.feature_vectors.shape[1]
         self.tokenize = self.tokenizer if self.tokenizer else self._whitespace_tokenize
 
@@ -149,7 +160,7 @@ class HatebaseVectorizer(TransformerMixin, BaseEstimator):
         for v in tokens:
             if v in self.index:
                 feature_mtx.append(self.feature_vectors.loc[self.index[v]].tolist())
-        return np.mean(feature_mtx, axis=0)
+        return np.sum(feature_mtx, axis=0)
 
     @classmethod
     def _whitespace_tokenize(cls, text):
@@ -206,16 +217,18 @@ class HatebaseVectorizer(TransformerMixin, BaseEstimator):
             dfs.append(cls._label_binarizer(dataset.is_about_nationality, 'abtnat_', dataset.vocabulary_id))
         if 'is_about_ethnicity' in features:
             dfs.append(cls._label_binarizer(dataset.is_about_ethnicity, 'abteth_', dataset.vocabulary_id))
-        if 'is_about_ethnicity' in features:
+        if 'is_about_religion' in features:
             dfs.append(cls._label_binarizer(dataset.is_about_religion, 'abtrel_', dataset.vocabulary_id))
-        if 'is_about_ethnicity' in features:
-            dfs.append(cls._label_binarizer(dataset.is_about_religion, 'abtgen_', dataset.vocabulary_id))
+        if 'is_about_gender' in features:
+            dfs.append(cls._label_binarizer(dataset.is_about_gender, 'abtgen_', dataset.vocabulary_id))
         if 'is_about_sexual_orientation' in features:
             dfs.append(cls._label_binarizer(dataset.is_about_sexual_orientation, 'abtsex_', dataset.vocabulary_id))
         if 'is_about_disability' in features:
-            dfs.append(cls._label_binarizer(dataset.is_about_sexual_orientation, 'abtdis_', dataset.vocabulary_id))
+            dfs.append(cls._label_binarizer(dataset.is_about_disability, 'abtdis_', dataset.vocabulary_id))
         if 'is_about_class' in features:
-            dfs.append(cls._label_binarizer(dataset.is_about_sexual_orientation, 'abtcls_', dataset.vocabulary_id))
+            dfs.append(cls._label_binarizer(dataset.is_about_class, 'abtcls_', dataset.vocabulary_id))
+        if 'number_of_sightings' in features:
+            dfs.append(cls._label_binarizer(dataset.number_of_sightings, 'abtcls_', dataset.vocabulary_id))
         return pd.concat(dfs, axis=1), index
 
     @classmethod
@@ -234,7 +247,10 @@ class HatebaseVectorizer(TransformerMixin, BaseEstimator):
         a = a.fillna('_NULL_')
         ohe = LabelBinarizer()
         data = ohe.fit_transform(a)
-        columns = [prefix + str(s).lower() for s in ohe.classes_[:data.shape[1]]]
+        if data.shape[1] == 1:
+            columns = [prefix]
+        else:
+            columns = [prefix + str(s).lower() for s in ohe.classes_[:data.shape[1]]]
         return pd.DataFrame(data, index=index, columns=columns)
 
     @classmethod
