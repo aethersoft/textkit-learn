@@ -125,11 +125,11 @@ def download_data():
     file_name = 'OLIDv1.0.zip'
     utils.download(url, data_home, file_name, unzip=True)
     # Download data for of Hate Speech (OffensEval2020) dataset.
-    url = 'https://ysenarath.s3.amazonaws.com/datasets/OffensEval2020.zip'
+    url = 'https://storage.googleapis.com/ysenarath/dataset/OffensEval2020.zip'
     file_name = 'OffensEval2020.zip'
     utils.download(url, get_data_home(), file_name, unzip=True)
     # Download data for of Hate Speech (founta18) dataset.
-    url = 'https://ysenarath.s3.amazonaws.com/datasets/founta18.zip'
+    url = 'https://storage.googleapis.com/ysenarath/dataset/founta18.zip'
     file_name = 'founta18.zip'
     utils.download(url, get_data_home(), file_name, unzip=True)
 
