@@ -1,18 +1,15 @@
 import json
 import os
 from builtins import classmethod
-from importlib import import_module
 from os.path import join
 from typing import Text, Iterable
 
 import numpy as np
 import pandas as pd
+from hatebase import HatebaseAPI
 from sklearn.base import TransformerMixin, BaseEstimator
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.preprocessing import LabelBinarizer
-from hatebase import HatebaseAPI
-
-from tklearn.configs import configs
 
 # noinspection SpellCheckingInspection
 __all__ = [

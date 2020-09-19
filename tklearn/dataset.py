@@ -1,7 +1,7 @@
 """ Base IO code for all datasets """
 
-import os
 import json
+import os
 import pickle
 import shutil
 from os import makedirs
@@ -17,7 +17,7 @@ from tklearn.utils import dict_normalize
 __all__ = [
     'get_data_home',
     'clear_data_home',
-    'download_data',
+    'download',
     'load_davidson17',
     'load_founta18',
     'load_fdcl18',

@@ -1,14 +1,14 @@
 import logging as logging
-from logging import config as logging_conf
 import os
 import shutil
 import sys
 import time
 import zipfile
+from logging import config as logging_conf
 from urllib import request
-from pandas.io.json import json_normalize
 
 import pandas as pd
+from pandas.io.json import json_normalize
 
 __all__ = [
     'pprint', 'get_logger', 'download',
