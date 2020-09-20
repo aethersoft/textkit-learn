@@ -10,10 +10,10 @@ from tklearn.embedding import conceptnet
 
 # noinspection SpellCheckingInspection
 __all__ = [
+    'WordEmbedding',
     'load_embedding',
     'load_numberbatch',
     'load_word2vec',
-    'WordEmbedding'
 ]
 
 
