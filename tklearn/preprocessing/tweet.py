@@ -63,15 +63,15 @@ class TweetPreprocessor(TextPreprocessor):
         s = self._clean_tweet(s)
         if 'link' in self.normalize:
             for link in self.get_links(s):
-                s = s.replace(link, '<link>')
+                s = s.replace(link, '__link__')
             for link in self.get_image_links(s):
-                s = s.replace(link, '<pic-link>')
+                s = s.replace(link, '__ilink__')
         if 'hashtag' in self.normalize:
             for hashtag in self.get_hashtags(s):
-                s = s.replace(hashtag, '<hashtag>')
+                s = s.replace(hashtag, '__hashtag__')
         if 'mention' in self.normalize:
             for mention in self.get_mentions(s):
-                s = s.replace(mention, '<mention>')
+                s = s.replace(mention, '__mention__')
         tokens = s.split()
         for ns in self.normalize:
             if isinstance(ns, str):
