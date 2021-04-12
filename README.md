@@ -3,4 +3,4 @@
 How to install
 --------------
 
-`pip install tklearn`
+`pip install textkit-learn`
