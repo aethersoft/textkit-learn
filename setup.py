@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="tklearn",  # Replace with your own username
+    name="textkit-learn",
     version="v0.0.4",
     author="Yasas Senarath",
     description="Helps computers to understand human languages.",
