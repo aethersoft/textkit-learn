@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="textkit-learn",
-    version="v0.0.4",
+    version="v0.0.5",
     author="Yasas Senarath",
     description="Helps computers to understand human languages.",
     long_description=long_description,
