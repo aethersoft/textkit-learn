@@ -39,6 +39,8 @@ class WordEmbedding:
             self.vocab = set(word_embedding.vocab.keys())
         elif hasattr(word_embedding, 'index'):
             self.vocab = set(word_embedding.index.tolist())
+        elif hasattr(word_embedding, 'key_to_index'):
+            self.vocab = set(word_embedding.key_to_index)
         else:
             self.vocab = set(word_embedding.keys())
         self.word_embedding = word_embedding
