@@ -10,7 +10,7 @@ from os.path import exists, expanduser, join
 import pandas as pd
 
 from tklearn import utils
-from tklearn.configs import configs
+from tklearn.config import config
 from tklearn.utils import dict_normalize
 
 # noinspection SpellCheckingInspection
@@ -67,7 +67,7 @@ def get_data_home(data_home=None):
         The path to onling data dir.
     """
     if data_home is None:
-        data_home = join(configs['RESOURCE_PATH'], 'data')
+        data_home = join(config['RESOURCE_PATH'], 'data')
     data_home = expanduser(data_home)
     if not exists(data_home):
         makedirs(data_home)
