@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from gensim.models import KeyedVectors
 
-from tklearn.configs import configs
+from tklearn.config import config
 from tklearn.embedding import conceptnet
 
 # noinspection SpellCheckingInspection
@@ -90,7 +90,7 @@ def load_word2vec(filename: Text = 'GoogleNews-vectors-negative300.bin.gz', path
     """
     return WordEmbedding(
         KeyedVectors.load_word2vec_format(
-            join(path, filename) if path else join(configs['RESOURCE_PATH'], 'resources', filename),
+            join(path, filename) if path else join(config['RESOURCE_PATH'], 'resources', filename),
             binary=True
         )
     )
@@ -114,11 +114,11 @@ def load_numberbatch(filename: Text = 'numberbatch-17.06-mini.h5', path: Text = 
     """
     if filename.endswith('.h5'):
         return WordEmbedding(
-            pd.read_hdf(join(path, filename) if path else join(configs['RESOURCE_PATH'], 'resources', filename), ),
+            pd.read_hdf(join(path, filename) if path else join(config['RESOURCE_PATH'], 'resources', filename), ),
             preprocessor=conceptnet.standardized_uri
         )
     return WordEmbedding(KeyedVectors.load_word2vec_format(
-        join(path, filename) if path else join(configs['RESOURCE_PATH'], 'resources', filename),
+        join(path, filename) if path else join(config['RESOURCE_PATH'], 'resources', filename),
         binary=False
     ))
 

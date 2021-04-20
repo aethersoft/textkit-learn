@@ -16,8 +16,7 @@ __all__ = [
     'download_hatebase', 'load_hatebase', 'HatebaseVectorizer'
 ]
 
-# noinspection SpellCheckingInspection
-from tklearn.dataset import get_data_home
+from tklearn.datasets import get_data_home
 
 
 def download_hatebase(token=None, resource_home=None):
