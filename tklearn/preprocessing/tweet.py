@@ -61,17 +61,18 @@ class TweetPreprocessor(TextPreprocessor):
             Preprocessed tweet.
         """
         s = self._clean_tweet(s)
-        if 'link' in self.normalize:
+        if filter(lambda x: x in ['link', 'links'], self.normalize):
             for link in self.get_links(s):
-                s = s.replace(link, '__link__')
+                s = s.replace(link, '<link>')
+        if filter(lambda x: x in ['image', 'images'], self.normalize):
             for link in self.get_image_links(s):
-                s = s.replace(link, '__ilink__')
-        if 'hashtag' in self.normalize:
+                s = s.replace(link, '<image>')
+        if filter(lambda x: x in ['hashtag', 'hashtags'], self.normalize):
             for hashtag in self.get_hashtags(s):
-                s = s.replace(hashtag, '__hashtag__')
-        if 'mention' in self.normalize:
+                s = s.replace(hashtag, '<hashtag>')
+        if filter(lambda x: x in ['mention', 'mentions'], self.normalize):
             for mention in self.get_mentions(s):
-                s = s.replace(mention, '__mention__')
+                s = s.replace(mention, '<mention>')
         tokens = s.split()
         for ns in self.normalize:
             if isinstance(ns, str):
@@ -100,6 +101,6 @@ class TweetPreprocessor(TextPreprocessor):
         x = saxutils.unescape(x)
         x = x.replace('\xa0', ' ')
         x = emoji.demojize(x)
-        x = ''.join(filter(lambda x: x in set(string.printable), x))
+        x = ''.join(filter(lambda item: item in set(string.printable), x))
         x = emoji.emojize(x)
         return x

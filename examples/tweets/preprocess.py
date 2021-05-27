@@ -14,6 +14,6 @@ tweet_samples = [
 ]
 
 if __name__ == '__main__':
-    tp = TweetPreprocessor(normalize=['link', 'hashtag', 'mention'])
+    tp = TweetPreprocessor(normalize=['links', 'hashtags', 'mentions'])
     preprocessed = tp.fit_transform(tweet_samples)
     print('\n'.join(preprocessed))
