@@ -26,7 +26,7 @@ def get_version(rel_path):
 
 setuptools.setup(
     name="textkit-learn",
-    version="0.0.5",
+    version="0.0.6",
     author="Yasas Senarath",
     description="Helps computers to understand human languages.",
     long_description=long_description,
