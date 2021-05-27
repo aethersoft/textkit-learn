@@ -1,13 +1,25 @@
+import enum
 import re
 import string
 from typing import Text, List
 from xml.sax import saxutils
-
 import emoji
+from six import string_types
+from collections.abc import Iterable
+
+from tklearn.preprocessing import TextPreprocessor
 
 __all__ = ['TweetPreprocessor']
 
-from tklearn.preprocessing.text import TextPreprocessor
+
+@enum.unique
+class Normalize(enum.Enum):
+    NONE = 0
+    ALL = 1
+    LINKS = 2
+    HASHTAGS = 3
+    MENTIONS = 4
+    IMAGES = 5
 
 
 class TweetPreprocessor(TextPreprocessor):
@@ -17,7 +29,7 @@ class TweetPreprocessor(TextPreprocessor):
     Several options are provided and you might be using them according to your use case.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, normalize=Normalize.NONE, **kwargs):
         """ Initialize `TweetPreprocessor` object.
 
         Parameters
@@ -26,7 +38,21 @@ class TweetPreprocessor(TextPreprocessor):
             Parameters
         """
         super(TweetPreprocessor, self).__init__()
-        self.normalize = (kwargs['normalize'] if 'normalize' in kwargs else []) or []
+        self.normalize = []
+        if normalize == Normalize.ALL:
+            self.normalize = [
+                Normalize.LINKS,
+                Normalize.HASHTAGS,
+                Normalize.MENTIONS,
+                Normalize.IMAGES,
+            ]
+        elif (normalize != Normalize.NONE) and isinstance(normalize, Iterable):
+            for item in normalize:
+                if isinstance(item, string_types):
+                    if not item.endswith('s'):
+                        item = '{}s'.format(item)
+                    item = Normalize[item.upper()]
+                self.normalize.append(item)
 
     @staticmethod
     def get_links(s: Text) -> List[Text]:
@@ -61,16 +87,16 @@ class TweetPreprocessor(TextPreprocessor):
             Preprocessed tweet.
         """
         s = self._clean_tweet(s)
-        if filter(lambda x: x in ['link', 'links'], self.normalize):
+        if Normalize.LINKS in self.normalize:
             for link in self.get_links(s):
                 s = s.replace(link, '<link>')
-        if filter(lambda x: x in ['image', 'images'], self.normalize):
+        if Normalize.IMAGES in self.normalize:
             for link in self.get_image_links(s):
                 s = s.replace(link, '<image>')
-        if filter(lambda x: x in ['hashtag', 'hashtags'], self.normalize):
+        if Normalize.HASHTAGS in self.normalize:
             for hashtag in self.get_hashtags(s):
                 s = s.replace(hashtag, '<hashtag>')
-        if filter(lambda x: x in ['mention', 'mentions'], self.normalize):
+        if Normalize.MENTIONS in self.normalize:
             for mention in self.get_mentions(s):
                 s = s.replace(mention, '<mention>')
         tokens = s.split()
