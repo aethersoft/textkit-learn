@@ -3,7 +3,7 @@ from tklearn.preprocessing import TweetPreprocessor
 # Thanks to [reference](https://www.postplanner.com/blog/13-good-tweets-you-can-totally-copy/) for
 #  following tweets and their creators.
 tweet_samples = [
-    'I wrote this haiku because Twitter has line breaks no other reason',
+    '@someone I wrote this haiku because Twitter has line breaks no other reason',
     'I had a GREAT week, thanks to YOU! If you need anything, please reach out. ❤️ ❤️ ❤️ '
     '#WorldSmileDay pic.twitter.com/ZpVmQPmcyc',
     'My heart goes out to the Malaysian people. This is such a tragedy. Words can\'t express how sad it is. '
@@ -14,6 +14,6 @@ tweet_samples = [
 ]
 
 if __name__ == '__main__':
-    tp = TweetPreprocessor(normalize=['links', 'hashtags', 'mentions'])
+    tp = TweetPreprocessor(normalize=['links', 'images', 'hashtags', 'mentions'])
     preprocessed = tp.fit_transform(tweet_samples)
     print('\n'.join(preprocessed))

@@ -43,7 +43,7 @@ if __name__ == '__main__':
     X = get_features(
         tweet_samples,
         embedding=WordEmbedding(model),
-        preprocessor=TweetPreprocessor(normalize=['link', 'mention']),
+        preprocessor=TweetPreprocessor(normalize=['links', 'mentions']),
         tokenizer=TweetTokenizer()
     )
     assert X.shape == (5, 100)
