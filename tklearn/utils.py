@@ -8,7 +8,6 @@ from logging import config as logging_conf
 from urllib import request
 
 import pandas as pd
-from pandas.io.json import json_normalize
 
 __all__ = [
     'pprint', 'get_logger', 'download',
@@ -17,7 +16,7 @@ __all__ = [
 
 
 def dict_normalize(d):
-    df = json_normalize(d, sep='.')
+    df = pd.json_normalize(d, sep='.')
     return df.to_dict(orient='records')[0]
 
 
