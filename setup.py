@@ -8,7 +8,7 @@ with open('requirements.txt') as fh:
 
 setuptools.setup(
     name="textkit-learn",
-    version="0.0.6",
+    version="0.0.7",
     author="Yasas Senarath",
     description="Helps computers to understand human languages.",
     long_description=long_description,
