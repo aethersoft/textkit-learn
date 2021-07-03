@@ -13,6 +13,8 @@ from tklearn import utils
 from tklearn.config import config
 from tklearn.utils import dict_normalize
 
+RESOURCE_PATH = config['DEFAULT']['resource_path']
+
 # noinspection SpellCheckingInspection
 __all__ = [
     'get_data_home',
@@ -67,7 +69,7 @@ def get_data_home(data_home=None):
         The path to onling data dir.
     """
     if data_home is None:
-        data_home = join(config['RESOURCE_PATH'], 'data')
+        data_home = join(RESOURCE_PATH, 'data')
     data_home = expanduser(data_home)
     if not exists(data_home):
         makedirs(data_home)
