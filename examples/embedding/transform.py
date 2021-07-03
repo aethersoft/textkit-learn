@@ -2,12 +2,12 @@
 This example reads texts and return the average glove embeddings for sentence.
 
  >>> get_features(
-        tweet_samples,
-        embedding=WordEmbedding(model),
-        preprocessor=TweetPreprocessor(normalize=['link', 'mention']),
-        tokenizer=TweetTokenizer()
-    ).shape
- (5, 100)
+ >>>    tweet_samples,
+ >>>    embedding=WordEmbedding(model),
+ >>>    preprocessor=TweetPreprocessor(normalize=['link', 'mention']),
+ >>>    tokenizer=TweetTokenizer()
+ >>> ).shape
+ >>> (5, 100)
 """
 
 from typing import List, Text
@@ -24,7 +24,10 @@ model = api.load('glove-twitter-100')
 
 
 def get_features(texts: List[Text], embedding: WordEmbedding, preprocessor: TextPreprocessor, tokenizer):
-    tokenized_texts = pd.Series(texts).apply(preprocessor.preprocess).apply(tokenizer.tokenize)
+    pp, tk = preprocessor, tokenizer
+    tokenized_texts = pd.Series(texts) \
+        .apply(pp.preprocess) \
+        .apply(tk.tokenize)
     et = make_embedding_transformer(embedding)  # is a function transformer so not required to return that
     return et.fit_transform(tokenized_texts)
 
@@ -46,4 +49,5 @@ if __name__ == '__main__':
         preprocessor=TweetPreprocessor(normalize=['links', 'mentions']),
         tokenizer=TweetTokenizer()
     )
+    print(X.shape)
     assert X.shape == (5, 100)
